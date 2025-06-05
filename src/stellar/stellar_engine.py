@@ -74,7 +74,7 @@ class StellarEngine:
         Args:
             date (float): The current time of the observer. The given is given in seconds in the UTC time zone.
         """
-
+        self.last_update = datetime.datetime.fromtimestamp(date, datetime.timezone.utc) 
         self.current_time = datetime.datetime.fromtimestamp(date, datetime.timezone.utc)
         self.t = self.ts.from_datetime(self.current_time)
 
