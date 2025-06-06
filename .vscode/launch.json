@@ -1,0 +1,57 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Marius Hills",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py", // This should point to your run.py
+            "console": "integratedTerminal", // This will show print statements in the VS Code terminal
+            "args": [
+                "environment=marius_hills_original" // Your command-line arguments
+            ],
+            "envFile": "/workspace/omnilrs/.env", // Any environment variables needed for your script
+            "justMyCode": false, // Set to false to debug into installed packages like Isaac Sim's, if needed
+            "cwd": "${workspaceFolder}" // Set the working directory for the script
+        },
+        {
+            "name": "Lunalab",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py", // This should point to your run.py
+            "console": "integratedTerminal", // This will show print statements in the VS Code terminal
+            "args": [
+                "environment=lunalab" // Your command-line arguments
+            ],
+            "envFile": "/workspace/omnilrs/.env", // Any environment variables needed for your script
+            "justMyCode": false, // Set to false to debug into installed packages like Isaac Sim's, if needed
+            "cwd": "${workspaceFolder}" // Set the working directory for the script
+        },
+        {
+            "name": "MH small no rocks and craters",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py", // This should point to your run.py
+            "console": "integratedTerminal", // This will show print statements in the VS Code terminal
+            "args": [
+                "environment=marius_hills_no_rocks_craters", 
+            ],
+            "envFile": "/workspace/omnilrs/.env", // Any environment variables needed for your script
+            "justMyCode": false, // Set to false to debug into installed packages like Isaac Sim's, if needed
+            "cwd": "${workspaceFolder}" // Set the working directory for the script
+        },
+        {
+            "name": "Largescale",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py", // This should point to your run.py
+            "console": "integratedTerminal", // This will show print statements in the VS Code terminal
+            "args": [
+                "environment=largescale" // Your command-line arguments
+            ],
+            "envFile": "/workspace/omnilrs/.env", // Any environment variables needed for your script
+            "justMyCode": false, // Set to false to debug into installed packages like Isaac Sim's, if needed
+            "cwd": "${workspaceFolder}" // Set the working directory for the script
+        },
+    ]
+}
