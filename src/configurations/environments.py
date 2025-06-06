@@ -330,6 +330,7 @@ class LargeScaleTerrainConf:
             "target_resolution": self.hr_dem_resolution,
             "source_padding": self.hrdem_interpolator_padding,
             "method": self.hrdem_interpolation_method,
+            "interpolator_name": self.hrdem_interpolator_name,
         }
 
         assert type(self.num_workers_craters) == int, "num_workers_craters must be an integer."

@@ -15,7 +15,7 @@ import os
 from omni.isaac.core.utils.stage import add_reference_to_stage
 import omni
 
-from pxr import UsdLux, Gf, Usd
+from pxr import UsdLux, Gf, Usd, Sdf
 
 from src.terrain_management.large_scale_terrain_manager import LargeScaleTerrainManager
 from src.terrain_management.large_scale_terrain.pxr_utils import set_xform_ops
@@ -87,6 +87,10 @@ class LargeScaleController(BaseEnv):
             Gf.Vec3f(self.sun_settings.color[0], self.sun_settings.color[1], self.sun_settings.color[2])
         )
         self._sun_lux.CreateColorTemperatureAttr(self.sun_settings.temperature)
+        enable_temp_attr = self._sun_lux.GetPrim().CreateAttribute(
+            "inputs:enableColorTemperature", Sdf.ValueTypeNames.Bool
+        )
+        enable_temp_attr.Set(True)
         x, y, z, w = SSTR.from_euler(
             "xyz", [0, self.sun_settings.elevation, self.sun_settings.azimuth - 90], degrees=True
         ).as_quat()

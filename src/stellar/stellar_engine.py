@@ -175,9 +175,7 @@ class StellarEngine:
             self.last_update = self.current_time
             self.t = self.ts.from_datetime(self.current_time)
             update = True
-            logging.debug(
-                f"StellarEngine: updated time to {self.current_time} (dt = {time_delta.total_seconds()}s)"
-            )
+
 
         return update
 

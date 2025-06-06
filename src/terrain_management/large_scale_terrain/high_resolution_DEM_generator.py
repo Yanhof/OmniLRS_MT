@@ -33,6 +33,7 @@ from src.terrain_management.large_scale_terrain.high_resolution_DEM_workers impo
     WorkerManagerConf,
     InterpolatorConf,
     CPUInterpolator,
+    CPUInterpolator_PIL,
     ThreadMonitor,
 )
 
@@ -101,6 +102,8 @@ class HighResDEMGenConf:
         self.crater_db_cfg = CraterDBConf(**self.crater_db_cfg)
         self.crater_sampler_cfg = CraterSamplerConf(**self.crater_sampler_cfg)
         self.crater_builder_cfg = CraterBuilderConf(**self.crater_builder_cfg)
+        if "interpolator_name" in self.interpolator_cfg:
+            self.interpolator_name = self.interpolator_cfg.pop("interpolator_name")
         self.interpolator_cfg = InterpolatorConf(**self.interpolator_cfg)
         self.crater_worker_manager_cfg = WorkerManagerConf(**self.crater_worker_manager_cfg)
         self.interpolator_worker_manager_cfg = WorkerManagerConf(**self.interpolator_worker_manager_cfg)
@@ -316,7 +319,13 @@ class HighResDEMGen:
         # worker managers to distribute the generation of craters and the
         # interpolation of the terrain data accross multiple workers.
         self.crater_builder = CraterBuilder(self.settings.crater_builder_cfg, db=self.crater_db)
-        self.interpolator = CPUInterpolator(self.settings.interpolator_cfg)
+        interpolater_name = self.settings.interpolator_name
+        if interpolater_name == "PIL":
+            self.interpolator = CPUInterpolator_PIL(self.settings.interpolator_cfg)
+        elif interpolater_name == "cv2":
+            self.interpolator = CPUInterpolator(self.settings.interpolator_cfg)
+        else:
+            logger.error(f"Unknown interpolator name: {interpolater_name}. Please use 'PIL' or 'cv2'.")
         # Creates the worker managers that will distribute the work to the workers.
         # This enables the generation of craters and the interpolation of the terrain
         # data to be done in parallel.
