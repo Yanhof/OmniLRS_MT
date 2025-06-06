@@ -10,6 +10,8 @@ from typing import Dict, List, Tuple
 import numpy as np
 import warnings
 import os
+import logging
+
 
 import omni
 from omni.isaac.core.world import World
@@ -23,7 +25,7 @@ from omni.isaac.core.utils.rotations import quat_to_rot_matrix
 from omni.isaac.core.utils.nucleus import get_assets_root_path
 from omni.isaac.dynamic_control import _dynamic_control
 from omni.isaac.core.prims import RigidPrim, RigidPrimView
-from pxr import Gf, UsdGeom, Usd
+from pxr import Gf, UsdGeom, Usd, UsdPhysics
 
 from WorldBuilders.pxr_utils import createXform, createObject, setDefaultOps
 from src.configurations.robot_confs import RobotManagerConf
@@ -129,6 +131,7 @@ class RobotManager:
 
         if robot_name[0] != "/":
             robot_name = "/" + robot_name
+        logging.warning(f"Robot name: {robot_name} and usd_path: {usd_path}")
         if self.num_robots >= self.max_robots:
             pass
         else:
@@ -280,6 +283,9 @@ class Robot:
         if self.is_on_nucleus:
             nucleus = get_assets_root_path()
             self.usd_path = os.path.join(nucleus, self.usd_path)
+
+
+        """"
         createObject(
             self.robot_path,
             self.stage,
@@ -288,6 +294,68 @@ class Robot:
             position=Gf.Vec3d(*position),
             rotation=Gf.Quatd(*orientation),
         )
+        """
+
+        #added by Yannic 
+
+ # Ensure the target prim path for the robot exists and is an Xform.
+        robot_prim = self.stage.GetPrimAtPath(self.robot_path)
+        if not robot_prim:
+            robot_prim = self.stage.DefinePrim(self.robot_path, "Xform")
+            logging.info(f"Robot.load: Defined new prim at '{self.robot_path}' for robot '{self.robot_name}'.")
+        else:
+            robot_prim = self.stage.OverridePrim(self.robot_path)
+            logging.info(f"Robot.load: Overriding existing prim at '{self.robot_path}' for robot '{self.robot_name}'.")
+
+        # Introspect the asset USD to find the articulation root prim path
+        internal_articulation_path_in_asset = None
+        try:
+            temp_stage = Usd.Stage.Open(self.usd_path, Usd.Stage.LoadAll) # LoadAll to ensure schemas are available
+            if temp_stage:
+                for prim_in_asset in temp_stage.Traverse():
+                    if prim_in_asset.HasAPI(UsdPhysics.ArticulationRootAPI):
+                        internal_articulation_path_in_asset = prim_in_asset.GetPath()
+                        break # Use the first one found
+                if not internal_articulation_path_in_asset:
+                    logging.warning(f"Robot.load: No ArticulationRootAPI prim found in asset '{self.usd_path}'. Will attempt to reference defaultPrim.")
+            else:
+                logging.error(f"Robot.load: Could not open asset USD for introspection: {self.usd_path}")
+        except Exception as e:
+            logging.error(f"Robot.load: Error during asset introspection for '{self.usd_path}': {e}")
+
+
+        # Add a reference to the robot's USD asset.
+        references = robot_prim.GetReferences()
+        references.ClearReferences() # Clear any existing references
+
+        if internal_articulation_path_in_asset:
+            references.AddReference(assetPath=self.usd_path, primPath=internal_articulation_path_in_asset)
+        else:
+            references.AddReference(assetPath=self.usd_path)
+
+
+        # Make the prim xformable and set its transform.
+        xformable = UsdGeom.Xformable(robot_prim)
+        xformable.ClearXformOpOrder()  # Good practice to start with a clean transform stack
+
+        # Convert numpy array position and orientation to Gf types.
+        # Ensure components are float.
+        # Position:
+        pos_gf = Gf.Vec3d(float(position[0]), float(position[1]), float(position[2]))
+        # Orientation: Assuming input 'orientation' is [w, x, y, z] for Gf.Quatd
+        orient_gf = Gf.Quatd(float(orientation[0]), float(orientation[1]), float(orientation[2]), float(orientation[3]))
+
+        # Add and set translate operation
+        translate_op = xformable.AddTranslateOp(UsdGeom.XformOp.PrecisionDouble)
+        translate_op.Set(pos_gf)
+
+        # Add and set orient operation for rotation
+        orient_op = xformable.AddOrientOp(UsdGeom.XformOp.PrecisionDouble)
+        orient_op.Set(orient_gf)
+
+## end of added by Yannic
+
+
         self.edit_graphs()
 
     def get_pose(self) -> List[float]:
@@ -345,7 +413,10 @@ class Robot:
                 self.reset_orientation[0],
             ],
         )
-
+        robot_position_in_world = self.get_world_pose()
+        logging.info(f" CoordinateSystem World position of Robot {self.robot_name} reset to position {robot_position_in_world[0]} and orientation {robot_position_in_world[1]}")
+        robot_position_local = self.reset_position
+        logging.info(f" CoordinateSystem Local position of Robot {self.robot_name} reset to position {robot_position_local[0]} and orientation {self.reset_orientation}")
 
 class RobotRigidGroup:
     """
@@ -378,6 +449,7 @@ class RobotRigidGroup:
         world.reset()
         if len(self.target_links) > 0:
             for target_link in self.target_links:
+                prim_path = os.path.join(self.root_path, self.robot_name, target_link)
                 rigid_prim = RigidPrim(
                     prim_path=os.path.join(self.root_path, self.robot_name, target_link),
                     name=f"{self.robot_name}/{target_link}",

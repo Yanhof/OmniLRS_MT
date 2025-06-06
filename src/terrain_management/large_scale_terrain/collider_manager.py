@@ -10,6 +10,7 @@ from typing import Tuple, List
 import dataclasses
 import numpy as np
 import cv2
+import logging
 
 import omni
 
@@ -160,6 +161,13 @@ class ColliderManager:
                         self.cache[block_coord] = self.collider_builder.create_collider(
                             block_coord, self.get_terrain_block(map_coord).T, self.get_name(block_coord)
                         )
+                        #debugging statements about coordinate system
+                        name_collider = self.get_name(block_coord)
+                        logging.info(f"CoordinateSystems - Collider Name: {name_collider}, "
+                                     f"Block Coord: {block_coord}, "
+                                     f"Map Coord: {map_coord}, "
+                                     f"Current Coord: {self.current_coordinates},")
+                        #end of debugging statements
             with ScopedTimer("prune_blocks", active=self.settings.profiling, unit="us"):
                 self.prune_blocks()
 

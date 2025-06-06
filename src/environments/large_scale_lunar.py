@@ -90,6 +90,7 @@ class LargeScaleController(BaseEnv):
         x, y, z, w = SSTR.from_euler(
             "xyz", [0, self.sun_settings.elevation, self.sun_settings.azimuth - 90], degrees=True
         ).as_quat()
+#        self._sun_lux.Create
         set_xform_ops(
             self._sun_lux.GetPrim(), Gf.Vec3d(0, 0, 0), Gf.Quatd(0.5, Gf.Vec3d(0.5, -0.5, -0.5)), Gf.Vec3d(1, 1, 1)
         )

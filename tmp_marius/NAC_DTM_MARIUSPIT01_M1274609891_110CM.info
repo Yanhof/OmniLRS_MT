@@ -1,0 +1,53 @@
+Driver: GTiff/GeoTIFF
+Files: tmp/NAC_DTM_MARIUSPIT01_M1274609891_110CM.tiff
+Size is 12112, 45557
+Coordinate System is:
+PROJCRS["Equirectangular Moon",
+    BASEGEOGCRS["GCS_Moon",
+        DATUM["D_Moon",
+            ELLIPSOID["Moon_localRadius",1737400,0,
+                LENGTHUNIT["metre",1,
+                    ID["EPSG",9001]]]],
+        PRIMEM["Reference_Meridian",0,
+            ANGLEUNIT["degree",0.0174532925199433,
+                ID["EPSG",9122]]]],
+    CONVERSION["Equidistant Cylindrical",
+        METHOD["Equidistant Cylindrical",
+            ID["EPSG",1028]],
+        PARAMETER["Latitude of 1st standard parallel",14,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8823]],
+        PARAMETER["Longitude of natural origin",180,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["False easting",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]]],
+    CS[Cartesian,2],
+        AXIS["easting",east,
+            ORDER[1],
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]],
+        AXIS["northing",north,
+            ORDER[2],
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]]]
+Data axis to CRS axis mapping: 1,2
+Origin = (3619147.400000299792737,456354.800000039977022)
+Pixel Size = (1.100000000000100,-1.100000000000100)
+Metadata:
+  AREA_OR_POINT=Area
+Image Structure Metadata:
+  INTERLEAVE=BAND
+Corner Coordinates:
+Upper Left  ( 3619147.400,  456354.800) ( 56d59'39.75"W, 15d 2'58.62"N)
+Lower Left  ( 3619147.400,  406242.100) ( 56d59'39.75"W, 13d23'49.22"N)
+Upper Right ( 3632470.600,  456354.800) ( 56d32'29.60"W, 15d 2'58.62"N)
+Lower Right ( 3632470.600,  406242.100) ( 56d32'29.60"W, 13d23'49.22"N)
+Center      ( 3625809.000,  431298.450) ( 56d46' 4.67"W, 14d13'23.92"N)
+Band 1 Block=12112x1 Type=Byte, ColorInterp=Gray
+  NoData Value=0
+  Offset: -0.0001538698261,   Scale:1.538698261e-05

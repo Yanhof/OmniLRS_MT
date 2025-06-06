@@ -14,6 +14,9 @@ import math
 import yaml
 import time
 import os
+import matplotlib.pyplot as plt
+
+debug_printing = True
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p")
@@ -113,6 +116,7 @@ class MapManager:
         """
 
         assert os.path.isdir(self.settings.folder_path), "Folder path does not exist"
+        logger.info(f"Fetching DEMs in {self.settings.folder_path}")
         self.dem_paths = {}
         self.dem_infos = {}
         for folder in os.listdir(self.settings.folder_path):
@@ -144,6 +148,8 @@ class MapManager:
         """
 
         if name in self.dem_paths:
+            dem_file_path = self.dem_paths[name] # Get the path
+            logger.info(f"Attempting to load DEM for '{name}' from path: {dem_file_path}") # Add this log statement
             self.lr_dem = self.load(self.dem_paths[name])
             if name in self.dem_infos:
                 self.lr_dem_info = self.dem_infos[name]
@@ -162,6 +168,40 @@ class MapManager:
             is_simulation_alive=self.is_simulation_alive,
             close_simulation=self.close_simulation,
         )
+        if debug_printing:
+            logger.info(f"Loaded low resolution DEM with shape {self.lr_dem.shape} and resolution {lr_dem_res} m/pixel")
+            logger.info(f"High resolution DEM settings: {self.hr_dem_settings}")
+            # Compute bounding box with margin
+            points_add_around = 3
+            y_indices, x_indices = np.where(self.lr_dem == -1620)
+            if len(y_indices) == 0 or len(x_indices) == 0:
+                return
+            else:
+                x_min, x_max = np.min(x_indices), np.max(x_indices)
+                y_min, y_max = np.min(y_indices), np.max(y_indices)
+
+                x_min_ext = max(0, x_min - points_add_around)
+                x_max_ext = min(self.lr_dem.shape[1], x_max + points_add_around)
+                y_min_ext = max(0, y_min - points_add_around)
+                y_max_ext = min(self.lr_dem.shape[0], y_max + points_add_around)
+
+                subregion = self.lr_dem[y_min_ext:y_max_ext, x_min_ext:x_max_ext]
+
+                # Plot heightmap with finer height coloring
+                plt.figure(figsize=(6, 6))
+                im = plt.imshow(
+                    subregion,
+                    cmap="jet",
+                    origin="upper",  # origin="upper" to match typical image orientation
+                    interpolation="bilinear",  # Smooth interpolation for finer coloring
+                )
+                plt.colorbar(im, label="Height")
+                plt.title("Heightmap Around Pit Region (Finer Coloring)")
+                plt.xlabel("X")
+                plt.ylabel("Y")
+                plt.savefig("Debugging_files/raw_input_pit_finer_coloring.png", dpi=300)
+                plt.close()
+
 
     def load_lr_dem_by_path(self, path: str) -> None:
         """
@@ -249,6 +289,7 @@ class MapManager:
     def get_lr_dem_res(self) -> float:
         """
         Returns the resolution of the low resolution DEM.
+        
 
         Returns:
             float: resolution of the low resolution DEM.

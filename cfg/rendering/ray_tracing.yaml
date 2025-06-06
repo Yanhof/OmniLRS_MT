@@ -18,10 +18,10 @@ lens_flares:
   focal_length: 12.0
 
 motion_blur:
-  enable: False
-  max_blur_diameter_fraction: 0.02
+  enable: false #was False
+  max_blur_diameter_fraction: 0.99 #0.02
   exposure_fraction: 1.0
-  num_samples: 8
+  num_samples: 20 #8
 
 chromatic_aberration:
   enable: False

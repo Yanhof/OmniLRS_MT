@@ -86,8 +86,13 @@ robots_settings:
   robots_root: "/Robots"
   parameters:
     -
-      robot_name: husky
-      usd_path: assets/USD_Assets/robots/ros2_husky_PhysX_vlp16.usd
+      #robot_name: husky
+     # usd_path: assets/USD_Assets/robots/ros2_husky_PhysX_vlp16.usd
+      #robot_name: jackal  
+      #usd_path: assets/USD_Assets/robots/ros2_jackal_PhysX_vlp16_stereo.usd
+      robot_name: LL
+      usd_path: assets/USD_Assets/robots/LL_sensing_camera_investigation.usd
+
       pose:
         position: [0.0, 0.0, 0.5]
         orientation: [1, 0, 0, 0]

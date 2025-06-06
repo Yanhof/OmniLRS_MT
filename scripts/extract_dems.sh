@@ -3,10 +3,10 @@
 echo "Extracting DEMs..."
 CWD=$(pwd)
 DEMS_PATH=$CWD/tmp
-TGT_PATH=$CWD/assets/Terrains/SouthPole
+TGT_PATH=$CWD/assets/Terrains/MariusHills
 
 echo "Reading DEMs info..."
-for dem in $(ls $DEMS_PATH/*.tif); do
+for dem in $(ls $DEMS_PATH/*.TIF); do
     dem_name_no_ext="${dem%.*}"
     gdalinfo $dem > $dem_name_no_ext.info
     python3 scripts/process_info.py --info_path $dem_name_no_ext.info --output_dir $DEMS_PATH --output_name $dem_name_no_ext

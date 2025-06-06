@@ -8,6 +8,7 @@ __status__ = "development"
 
 import dataclasses
 import os
+import logging
 
 
 @dataclasses.dataclass
@@ -32,6 +33,9 @@ class Coordinates:
         assert (
             self.longitude >= -180.0 and self.longitude <= 180.0
         ), "The longitude must be between -180 and 180 degrees."
+        logging.info(
+            f"Coordinates set to latitude: {self.latitude}, longitude: {self.longitude}"
+        )
 
 
 @dataclasses.dataclass
@@ -157,7 +161,7 @@ class LargeScaleTerrainConf:
     input_queue_size: int = 400
     output_queue_size: int = 30
 
-    hrdem_interpolation_method: str = "bicubic"
+    hrdem_interpolation_method: str = "bicubic" 
     hrdem_interpolator_name: str = "PIL"
     hrdem_interpolator_padding: int = 2
 
@@ -168,9 +172,9 @@ class LargeScaleTerrainConf:
     geo_cm_num_texels_per_level: int = 384
     geo_cm_target_res: float = 0.02
     geo_cm_fine_interpolation_method: str = "bilinear"
-    geo_cm_coarse_interpolation_method: str = "bicubic"
+    geo_cm_coarse_interpolation_method: str = "bicubic" 
     geo_cm_fine_acceleration_mode: str = "hybrid"
-    geo_cm_coarse_acceleration_mode: str = "gpu"
+    geo_cm_coarse_acceleration_mode: str = "hybrid"
     geo_cm_apply_smooth_shading: bool = False
     geo_cm_semantic_label: str = "terrain"
     geo_cm_texture_name: str = "LunarRegolith8k"
@@ -307,15 +311,17 @@ class LargeScaleTerrainConf:
         }
 
         assert type(self.hrdem_interpolation_method) == str, "hrdem_interpolation_method must be a string."
-        assert self.hrdem_interpolation_method in [
+        assert self.hrdem_interpolation_method in [ #changed Yannic to add linear
             "nearest",
             "bilinear",
             "bicubic",
+            "linear",
         ], "hrdem_interpolation_method must be either 'nearest', 'bilinear' or 'bicubic'."
         assert type(self.hrdem_interpolator_name) == str, "hrdem_interpolator_name must be a string."
-        assert self.hrdem_interpolator_name in [
+        assert self.hrdem_interpolator_name in [ #changed Yannic to add cv2
             "PIL",
             "OpenCV",
+            "cv2",
         ], "hrdem_interpolator_name must be either 'PIL' or 'OpenCV'."
         assert type(self.hrdem_interpolator_padding) == int, "hrdem_interpolator_padding must be an integer."
         assert self.hrdem_interpolator_padding >= 0, "hrdem_interpolator_padding must be a non-negative integer."

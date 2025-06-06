@@ -1,0 +1,189 @@
+# cfg/environment/marius_hills_original.yaml
+
+name: LargeScale # Keep this as LargeScale as it defines the environment type
+seed: 42 # You can change this seed if you want a different procedural generation overlay
+physics_dt: 0.0166 #0.01666 # 60 Hz #actually can change also in default_physics.yaml
+rendering_dt: 0.0333 #0.0333 # 30 Hz
+enforce_realtime: true #if true uses the physics_dt
+
+# physics_settings: best to change in cfg/physics/default_physics.yaml
+
+
+
+# Stage settings, only edit if you know what you are doing.
+large_scale_terrain:
+  #lr_dem_folder_path: "assets/Terrains/MariusHills4m" # DEM with nan in pit
+  #lr_dem_folder_path: "assets/Terrains/MariusHills_pit_40m_depth_gradual" # DEM with 40m bottom going in step of 20m down
+  lr_dem_folder_path: "assets/Terrains/MariusHills_pit_40m_depth_gradual_slow" # DEM with 40m bottom going in step of 10m down
+  #lr_dem_folder_path: "assets/Terrains/MariusHills_nan_set_-1620_all" # DEM where set all nan to -1620, which is roughly 40m below edge
+  lr_dem_name: "DM1" # The subolfder name of the DEM folder
+  block_size: 20 # 20 works for no padding, 40 also 80 also but takes long. 
+
+
+  #started to change the settings for the large scale terrain, default values see environments.py
+  geo_cm_coarse_interpolation_method: "bilinear" 
+  geo_cm_target_res: 0.02 #0.02
+  hr_dem_resolution: 0.025 #0.025
+  geo_cm_fine_interpolation_method: "bilinear"
+  hr_dem_num_blocks: 4 #block_span for the rocks below needs to lower than this
+  #somehow does only bicubic exist with PIL
+  hrdem_interpolation_method: "linear" 
+  hrdem_interpolator_name: "cv2"
+  
+  num_workers_craters: 12
+  num_workers_interpolation: 4
+
+
+  #starting poisition need to be multiple of block size
+  #starting_position: [480, -660] #is near pit for block size 20
+  starting_position: [480,-580] #is near pit edge for block size 20
+  #starting_position: [260,-700] #is near landing zone for block size 20
+  #starting_position: [500,-520] #is in pit for block size 40
+  #starting_position: [440,-560] #is near pit for block size 40
+  
+
+  # -----------------------------
+  #Crateer and rock generation settings
+  #for now same as largescale with alternate rock sizes but adapted block_size
+  hr_dem_generate_craters: True # 
+
+  #densities (float, optional): densities of the craters (in units per square meters). Defaults to [0.25,1.5,5].
+  #radius (list, optional): min and max radii of the craters (in meters). Defaults to [(1.5,2.5),(0.75,1.5),(0.25,0.5)].
+  crater_gen_densities: [0.005, 0.05, 0.2]
+  crater_gen_radius: [[1.5, 2.5], [0.75, 1.5], [0.25, 0.5]]
+
+  rock_gen_cfgs:
+    -
+      rock_sampler_cfg: 
+        block_size: 20
+        seed: 42
+        rock_dist_cfg:
+          position_distribution:
+            name: "thomas_point_process"
+            parent_density: 0.04
+            child_density: 150
+            sigma: 3.0
+            seed: 42
+          scale_distribution:
+            name: "uniform"
+            min: 0.02
+            max: 0.05
+            seed: 43
+      rock_assets_folder: "assets/USD_Assets/rocks/lunar_rocks/rocks_s2_r128"
+      instancer_name: "very_small_rock_instancer"
+      seed: 5
+      block_span: 4
+      add_colliders: False
+    -
+      rock_sampler_cfg:
+        block_size: 20
+        seed: 42
+        rock_dist_cfg:
+          position_distribution:
+            name: "thomas_point_process"
+            parent_density: 0.01
+            child_density: 25
+            sigma: 2.5
+            seed: 44
+          scale_distribution:
+            name: "uniform"
+            min: 0.05
+            max: 0.2
+            seed: 45
+      rock_assets_folder: "assets/USD_Assets/rocks/lunar_rocks/rocks_s3_r512"
+      instancer_name: "small_rock_instancer"
+      seed: 51
+      block_span: 4
+      add_colliders: True
+      collider_mode: "meshSimplification"
+    -
+      rock_sampler_cfg:
+        block_size: 20
+        seed: 42
+        rock_dist_cfg:
+          position_distribution:
+            name: "thomas_point_process"
+            parent_density: 0.0025
+            child_density: 5
+            sigma: 3.0
+            seed: 46
+          scale_distribution:
+            name: "uniform"
+            min: 0.2
+            max: 0.75
+            seed: 47
+      rock_assets_folder: "assets/USD_Assets/rocks/lunar_rocks/rocks_s4_r512"
+      instancer_name: "medium_rock_instancer"
+      seed: 52
+      block_span: 4
+      add_colliders: True
+      collider_mode: "meshSimplification"
+    -
+      rock_sampler_cfg:
+        block_size: 20
+        seed: 42
+        rock_dist_cfg:
+          position_distribution:
+            name: "thomas_point_process"
+            parent_density: 0.001
+            child_density: 3
+            sigma: 4.0
+            seed: 48
+          scale_distribution:
+            name: "uniform"
+            min: 0.75
+            max: 2.5
+            seed: 49
+      rock_assets_folder: "assets/USD_Assets/rocks/lunar_rocks/rocks_s5_r1024"
+      instancer_name: "large_rock_instancer"
+      seed: 53
+      block_span: 4
+      add_colliders: True
+      collider_mode: "meshSimplification"
+
+
+# Stellar engine settings 
+stellar_engine_settings:
+  start_date:
+    year: 2024
+    month: 5 
+    day: 20 # !!!!!!! 20.5.2024 10:30 is lunar morning
+    hour: 10
+    minute: 30
+  time_scale: 3600 #1.0 #change to 1.0 for real time, 600 means 1s = 10min
+  update_interval: 5 #time before stellar engine updates 
+
+# Sun settings (copy as is)
+sun_settings:
+  intensity: 1750.0 #need to tune
+  angle: 0.53 #should be tuned already
+  diffuse_multiplier: 1.0
+  specular_multiplier: 1.0
+  color: [1.0, 1.0, 1.0]
+  temperature: 6500.0 #effective according to NASA 5772K
+  azimuth: 180.0
+  elevation: 45.0
+
+
+
+# Robots settings 
+robots_settings:
+  uses_nucleus: False
+  is_ROS2: True
+  max_robots: 1
+  robots_root: "/Robots"
+  parameters:
+    -
+      #robot_name: husky
+     # usd_path: assets/USD_Assets/robots/ros2_husky_PhysX_vlp16.usd
+      #robot_name: jackal
+      #usd_path: assets/USD_Assets/robots/ros2_jackal_PhysX_vlp16_stereo.usd
+      robot_name: LL
+      #2ROS CAMS
+      usd_path: assets/USD_Assets/robots/lunar_leaper_2cams_2ROS_dimensions_adapted_150mm_clearance_mass12_7_wider_wheels_further_back_removed_lidar_removed_exisitng_stereo_cam__physics_material_solar_gpr_legs_v12.usd
+      #usd_path: assets/USD_Assets/robots/LL_sensing_camera_investigation.usd
+      pose:
+        position: [1050, 400, 0] #is ignored in largescale use starting_position above
+        orientation: [1, 0, 0, 0] #is ignored in largescale
+      domain_id: 0
+      target_links: ["front_left_wheel_link", "front_right_wheel_link", "rear_left_wheel_link", "rear_right_wheel_link"]

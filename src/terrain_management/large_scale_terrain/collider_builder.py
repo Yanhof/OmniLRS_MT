@@ -10,6 +10,7 @@ from typing import Tuple
 import numpy as np
 import dataclasses
 import os
+import logging
 
 from pxr import UsdGeom, Gf, Usd
 
@@ -125,6 +126,10 @@ class ColliderBuilder:
         """
 
         with ScopedTimer("create_collider_mesh", active=self.settings.profiling):
+            num_nans = np.sum(np.isnan(map))
+            if num_nans > 0:
+                logging.warning(f"There are {num_nans} nans in the map")
+                #map = np.nan_to_num(map, nan=-1620.0) # Change Yannic, first set nan values to very low as nan are in pit and lead to error in mesh/collider generation near it
             self.sim_verts[:, -1] = map.flatten()
             mesh_path = os.path.join(self.settings.collider_path, name)
 

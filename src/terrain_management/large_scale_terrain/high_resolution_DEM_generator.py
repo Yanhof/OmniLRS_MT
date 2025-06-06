@@ -14,6 +14,7 @@ import logging
 import time
 import copy
 import sys
+from scipy.ndimage import convolve
 
 from src.terrain_management.large_scale_terrain.utils import ScopedTimer, BoundingBox, CraterMetadata
 from src.terrain_management.large_scale_terrain.crater_generation import (
@@ -31,7 +32,7 @@ from src.terrain_management.large_scale_terrain.high_resolution_DEM_workers impo
     BicubicInterpolatorManager,
     WorkerManagerConf,
     InterpolatorConf,
-    CPUInterpolator_PIL,
+    CPUInterpolator,
     ThreadMonitor,
 )
 
@@ -127,6 +128,9 @@ class HighResDEMGen:
             close_simulation (callable): A callable that closes the simulation.
         """
         self.low_res_dem = low_res_dem
+        num_nan_lr = np.sum(np.isnan(self.low_res_dem))
+        if num_nan_lr > 0:
+            logger.warning(f"In high_resolution_DEM_generator, There are {num_nan_lr} nans in the low res DEM")
         self.settings = settings
         self.is_simulation_alive = is_simulation_alive
         self.close_simulation = close_simulation
@@ -140,6 +144,163 @@ class HighResDEMGen:
         self.terrain_is_primed = False
         self.crater_db_is_primed = False
         self.build()
+
+
+#Begin Yannic change, no longer needed here as is handled now in separate file, where user can fill nans with some values
+    def fill_dem_holes_gradually(self, step_size=20.0, depth_below_edge=40.0, max_iterations=100) -> None:
+        """
+        Fills NaN values in the low resolution DEM gradually, ensuring that the filled values
+        do not exceed a certain depth below the lowest surrounding valid terrain.
+        This method uses a dynamic target depth based on the lowest valid neighbor of NaN cells,
+        and fills NaN cells in steps of `step_size` until all NaNs are filled or the maximum
+        number of iterations is reached.
+        Args:
+            step_size (float): The step size in meters for filling NaN values.
+            depth_below_edge (float): The depth below the lowest valid neighbor to fill NaN values.
+            max_iterations (int): The maximum number of iterations to perform.
+        """
+      # --- Helper function for consistent printing ---
+        def _get_print_region_coords(dem_array):
+            nan_rows, nan_cols = np.where(np.isnan(dem_array))
+            
+            if nan_rows.size == 0:
+                # If no NaNs initially, print a central small portion for context
+                center_r, center_c = dem_array.shape[0] // 2, dem_array.shape[1] // 2
+                pad = 1
+                return (max(0, center_r - pad), min(dem_array.shape[0], center_r + pad + 1),
+                        max(0, center_c - pad), min(dem_array.shape[1], center_c + pad + 1))
+
+            min_r, max_r = nan_rows.min(), nan_rows.max()
+            min_c, max_c = nan_cols.min(), nan_cols.max()
+
+            # Expand the bounding box slightly to show surrounding context
+            pad = 1
+            start_r = max(0, min_r - pad)
+            end_r = min(dem_array.shape[0], max_r + pad + 1)
+            start_c = max(0, min_c - pad)
+            end_c = min(dem_array.shape[1], max_c + pad + 1)
+            
+            return start_r, end_r, start_c, end_c
+
+        def _print_dem_region(dem_array, title, coords):
+            start_r, end_r, start_c, end_c = coords
+            print(f"\n--- {title} ---")
+            print(dem_array[start_r:end_r, start_c:end_c])
+        # --- End of Helper functions ---
+
+        nan_mask = np.isnan(self.low_res_dem)
+        num_nan_lr = np.sum(nan_mask)
+
+        if num_nan_lr == 0:
+            logger.info("No NaN values found in the low res DEM. No filling needed.")
+            return
+
+        logger.warning(f"In HighResolutionDEMGenerator, there are {num_nan_lr} nans values in the low res DEM.")
+        logger.warning(f"Will fill them gradually in steps of {step_size}m, down to {depth_below_edge}m below the lowest surrounding valid terrain.")
+        # Determine the consistent print region based on the initial state of NaNs
+        print_coords = _get_print_region_coords(self.low_res_dem)
+        
+        # Print the DEM BEFORE changes using the determined region
+        _print_dem_region(self.low_res_dem, "DEM Before NaN Fill", print_coords)
+
+
+        current_dem = np.copy(self.low_res_dem)
+        nan_mask_current = np.copy(nan_mask)
+
+        
+        # Find all valid values that are adjacent to any NaN initially
+        # This gives us a base level to calculate the target depth from.
+        initial_valid_neighbors_mask = ~np.isnan(self.low_res_dem)
+        
+        # Convolve initial_valid_neighbors_mask with a kernel to find where NaNs are adjacent to valid cells
+        # This identifies the 'rim' of the hole
+        kernel_adj = np.array([[0, 1, 0],
+                               [1, 0, 1],
+                               [0, 1, 0]]) # 4-connectivity for simplicity
+
+        # Identify cells that are NaN AND have at least one valid neighbor in the original DEM
+        initial_nan_frontier = nan_mask & (convolve(initial_valid_neighbors_mask.astype(float), kernel_adj, mode='constant', cval=0.0) > 0)
+        
+        # Find the values of valid neighbors of these initial frontier NaNs
+        # This helps establish the baseline 'edge' height.
+        # We need to iterate through these frontier NaNs and find their neighbors.
+        
+        all_initial_border_values = []
+        rows, cols = np.where(initial_nan_frontier)
+        for r, c in zip(rows, cols):
+            for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]: # 4-connectivity
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < self.low_res_dem.shape[0] and 0 <= nc < self.low_res_dem.shape[1]:
+                    if not np.isnan(self.low_res_dem[nr, nc]):
+                        all_initial_border_values.append(self.low_res_dem[nr, nc])
+
+        if not all_initial_border_values:
+            logger.warning("No valid cells found adjacent to initial NaNs. Cannot determine a dynamic target depth.")
+            # Fallback to a hardcoded deep value if no valid edges are found (e.g., entire DEM is NaN)
+            calculated_target_depth = -9999.0 # Very deep fallback
+        else:
+            # The target depth will be based on the lowest value among the initial valid border cells.
+            # This ensures that even large holes don't go shallower than the lowest part of their original rim.
+            lowest_initial_border_height = np.min(all_initial_border_values)
+            calculated_target_depth = lowest_initial_border_height - depth_below_edge
+            logger.info(f"Calculated dynamic target depth for the hole: {calculated_target_depth:.2f}m (based on lowest initial border at {lowest_initial_border_height:.2f}m and {depth_below_edge}m below).")
+
+        for iteration in range(max_iterations):
+            # Find cells that are currently NaN but have at least one non-NaN neighbor
+            kernel = np.array([[0, 1, 0],
+                               [1, 0, 1],
+                               [0, 1, 0]])
+
+            valid_neighbors_mask = ~np.isnan(current_dem)
+            valid_neighbor_count = convolve(valid_neighbors_mask.astype(float), kernel, mode='constant', cval=0.0)
+            
+            frontier_nan_mask = nan_mask_current & (valid_neighbor_count > 0)
+
+            if not np.any(frontier_nan_mask):
+                logger.info(f"All NaN values filled or no more frontiers after {iteration} iterations.")
+                break
+
+            updates = []
+            frontier_indices = np.argwhere(frontier_nan_mask)
+
+            for r, c in frontier_indices:
+                neighbors = []
+                for dr, dc in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < current_dem.shape[0] and 0 <= nc < current_dem.shape[1]:
+                        if not np.isnan(current_dem[nr, nc]):
+                            neighbors.append(current_dem[nr, nc])
+                
+                if neighbors:
+                    # The value for the current NaN cell should be determined by stepping down
+                    # from the highest elevation of its *current* valid neighbors.
+                    # This ensures the "gradual decrease" into the hole.
+                    max_neighbor_val = np.max(neighbors)
+                    
+                    # Calculate the new value, ensuring it doesn't go deeper than the dynamically calculated target_depth
+                    new_val = max(calculated_target_depth, max_neighbor_val - step_size)
+                    
+                    updates.append(((r, c), new_val))
+            
+            # Apply all updates for this iteration
+            for (r, c), val in updates:
+                current_dem[r, c] = val
+                nan_mask_current[r, c] = False
+
+            if not np.any(nan_mask_current):
+                logger.info(f"All NaN values filled after {iteration + 1} iterations.")
+                break
+        else:
+            logger.warning(f"Max iterations ({max_iterations}) reached. Some NaN values might remain unfilled.")
+
+        self.low_res_dem = current_dem
+
+        # Print the DEM AFTER changes using the SAME determined region
+        _print_dem_region(self.low_res_dem, "DEM After NaN Fill", print_coords)
+        logger.info(f"Total NaNs remaining after fill: {np.sum(np.isnan(self.low_res_dem))}")
+
+    # End Yannic change
+
 
     def build(self) -> None:
         """
@@ -155,7 +316,7 @@ class HighResDEMGen:
         # worker managers to distribute the generation of craters and the
         # interpolation of the terrain data accross multiple workers.
         self.crater_builder = CraterBuilder(self.settings.crater_builder_cfg, db=self.crater_db)
-        self.interpolator = CPUInterpolator_PIL(self.settings.interpolator_cfg)
+        self.interpolator = CPUInterpolator(self.settings.interpolator_cfg)
         # Creates the worker managers that will distribute the work to the workers.
         # This enables the generation of craters and the interpolation of the terrain
         # data to be done in parallel.
@@ -558,6 +719,7 @@ class HighResDEMGen:
             while (not self.is_map_done()) and (self.monitor_thread.thread.is_alive()):
                 self.collect_terrain_data()
                 time.sleep(0.1)
+        logging.info("Updated the terrain colliders")
 
     def update_high_res_dem(self, coords: Tuple[float, float]) -> bool:
         """
@@ -590,6 +752,8 @@ class HighResDEMGen:
         # Initial map generation
         if not self.sim_is_warm:
             logger.debug("Warming up simulation")
+            logger.debug("Triggering high res DEM update")
+            logger.debug(f"Resolution is {self.settings.resolution}")
             self.shift(block_coordinates)
             # Threaded update, the function will return before the update is done
             thread = threading.Thread(target=self.threaded_high_res_dem_update)
@@ -798,14 +962,17 @@ class HighResDEMGen:
                 + offset : int((y_c + self.settings.block_size) / self.settings.resolution)
                 + offset,
             ] += data
-            self.block_grid_tracker[local_coords]["has_crater_data"] = True
+            #print(f"Block {coords} has crater data")
 
+            self.block_grid_tracker[local_coords]["has_crater_data"] = True
         # Collect the results from the workers responsible for interpolating the terrain
         terrain_results = self.interpolator_manager.collect_results()
         for coords, data in terrain_results:
             x_i, y_i = coords
             x_c, y_c = self.map_grid_block2coords[(x_i, y_i)]
             local_coords = (x_c, y_c)
+
+            ''' Existed code, created problems for marius hills due to dimensions
             self.high_res_dem[
                 int(x_c / self.settings.resolution)
                 + offset : int((x_c + self.settings.block_size) / self.settings.resolution)
@@ -814,8 +981,50 @@ class HighResDEMGen:
                 + offset : int((y_c + self.settings.block_size) / self.settings.resolution)
                 + offset,
             ] += data
-            self.block_grid_tracker[local_coords]["has_terrain_data"] = True
+            '''
+            #Workaround for the above code
+            x_start = int(x_c / self.settings.resolution) + offset
+            x_end = int((x_c + self.settings.block_size) / self.settings.resolution) + offset
+            y_start = int(y_c / self.settings.resolution) + offset
+            y_end = int((y_c + self.settings.block_size) / self.settings.resolution) + offset
 
+            # Compute target shape
+            x_len = x_end - x_start
+            y_len = y_end - y_start
+
+            data_x, data_y = data.shape
+            pad_x = max(0, x_len - data_x)
+            pad_y = max(0, y_len - data_y)
+
+            if pad_x > 0 or pad_y > 0:
+                logger.debug(f"Padding terrain data at {coords}: original shape {data.shape}, target shape ({x_len}, {y_len})")
+                # Create new array filled with edge mean values
+                padded_data = np.zeros((x_len, y_len), dtype=data.dtype)
+                padded_data[:data_x, :data_y] = data
+
+                if pad_x > 0:
+                    edge_mean_x = np.mean(data[-1, :min(y_len, data_y)])
+                    padded_data[data_x:, :min(y_len, data_y)] = edge_mean_x
+
+                if pad_y > 0:
+                    edge_mean_y = np.mean(data[:min(x_len, data_x), -1])
+                    padded_data[:min(x_len, data_x), data_y:] = edge_mean_y
+
+                if pad_x > 0 and pad_y > 0:
+                    corner_mean = np.mean(data[-1, -1])
+                    padded_data[data_x:, data_y:] = corner_mean
+
+                data = padded_data
+
+            elif data.shape != (x_len, y_len):
+                logger.debug(f"Trimming terrain data at {coords}: original shape {data.shape}, target shape ({x_len}, {y_len})")
+
+                data = data[:x_len, :y_len]
+
+            self.high_res_dem[x_start:x_end, y_start:y_end] += data
+
+            #end of workaround
+            self.block_grid_tracker[local_coords]["has_terrain_data"] = True
     def shutdown(self) -> None:
         """
         Shuts down the high resolution DEM generation. This will shutdown the workers
@@ -848,7 +1057,7 @@ if __name__ == "__main__":
         "seed": 42,
         "resolution": 0.05,
         "z_scale": 1.0,
-        "source_resolution": 5.0,
+        "source_resolution": 4.0,#5.0,
         "resolution": 0.05,
         "interpolation_padding": 2,
         "generate_craters": True,
@@ -897,7 +1106,7 @@ if __name__ == "__main__":
         "z_scale": 1.0,
     }
     ICfg = {
-        "source_resolution": 5.0,
+        "source_resolution": 1.1,#5.0,
         "target_resolution": 0.05,
         "source_padding": 2,
         "method": "bicubic",
@@ -914,6 +1123,7 @@ if __name__ == "__main__":
 
     settings = HighResDEMGenConf(**HRDEMGenCfg_D)
     low_res_dem = np.load("assets/Terrains/SouthPole/NPD_final_adj_5mpp_surf/dem.npy")
+    #low_res_dem = np.load("assets/Terrains/MariusHills/DM1/dem.npy")
     HRDEMGen = HighResDEMGen(low_res_dem, settings)
 
     from matplotlib import pyplot as plt

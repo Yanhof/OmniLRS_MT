@@ -5,16 +5,18 @@ __version__ = "2.0.0"
 __maintainer__ = "Antoine Richard"
 __email__ = "antoine.richard@uni.lu"
 __status__ = "development"
+import logging
+import datetime
+import json
 
 # Custom libs
 from src.environments_wrappers.ros2.base_wrapper_ros2 import ROS_BaseManager
 from src.environments.large_scale_lunar import LargeScaleController
 
 # Loads ROS2 dependent libraries
-from std_msgs.msg import Float32, ColorRGBA
+from std_msgs.msg import Float32, ColorRGBA, String, Empty
 from geometry_msgs.msg import Pose
 import rclpy
-
 
 class ROS_LargeScaleManager(ROS_BaseManager):
     """
@@ -36,8 +38,10 @@ class ROS_LargeScaleManager(ROS_BaseManager):
             is_simulation_alive (callable): function to check if the simulation is alive.
             **kwargs: Additional arguments.
         """
-
         super().__init__(environment_cfg=environment_cfg, **kwargs)
+
+        
+
         self.LC = LargeScaleController(
             **environment_cfg, is_simulation_alive=is_simulation_alive, close_simulation=close_simulation
         )
@@ -48,6 +52,52 @@ class ROS_LargeScaleManager(ROS_BaseManager):
         self.create_subscription(ColorRGBA, "/OmniLRS/Sun/Color", self.set_sun_color, 1)
         self.create_subscription(Float32, "/OmniLRS/Sun/ColorTemperature", self.set_sun_color_temperature, 1)
         self.create_subscription(Float32, "/OmniLRS/Sun/AngularSize", self.set_sun_angle, 1)
+
+        # New subscription for setting the time in the StellarEngine
+        self.create_subscription(String, "/OmniLRS/StellarEngine/SetTime", self.set_stellar_engine_time, 1)
+        logging.info("Subscribed to /OmniLRS/StellarEngine/SetTime")
+    
+    
+    def set_stellar_engine_time(self, data: String) -> None:
+        """
+        Sets the time in the StellarEngine.
+
+        Args:
+            data (String): JSON string containing the new start_date.
+        """
+        #WARNING: changes time but somehow not yet the illumination through it
+        try:
+            # Parse the JSON string
+            start_date = json.loads(data.data)
+
+            # Validate the required fields
+            required_fields = ["year", "month", "day", "hour", "minute"]
+            for field in required_fields:
+                if field not in start_date:
+                    raise ValueError(f"Missing required field: {field}")
+
+            # Prepare the datetime object
+            new_time = datetime.datetime(
+                year=start_date["year"],
+                month=start_date["month"],
+                day=start_date["day"],
+                hour=start_date["hour"],
+                minute=start_date["minute"],
+                tzinfo=datetime.timezone.utc,
+            )
+            # Use the modifications queue
+            self.modifications.append([
+                self.LC.SE.set_time,
+                {"date": new_time.timestamp()}
+            ])
+            self.modifications.append([
+            self.LC.update_stellar_engine,
+            {"dt": 0.0}
+            ])
+
+        except (json.JSONDecodeError, ValueError) as e:
+            logging.error(f"Failed to parse start_date: {e}")
+
 
     def periodic_update(self, dt: float) -> None:
         """

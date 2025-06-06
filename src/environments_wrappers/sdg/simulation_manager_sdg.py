@@ -58,10 +58,13 @@ class SDG_SimulationManager:
         for i in range(100):
             self.world.step(render=True)
         print("After world reset")
+        #commenting this line to avoid the issue of the prim path not being found
         self.generation_settings.prim_path = self.LC.scene_name + "/" + self.generation_settings.prim_path
         self.AL = AutonomousLabeling(self.generation_settings)
         self.AL.load()
         self.count = 0
+        # Randomize once to setup the camera mixer
+        self.LC.randomize()
 
     def run_simulation(self) -> None:
         """

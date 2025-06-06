@@ -1,0 +1,52 @@
+Driver: GTiff/GeoTIFF
+Files: ../tmp/NAC_DTM_MARIUS.tiff
+Size is 7277, 14910
+Coordinate System is:
+PROJCRS["Equirectangular Moon",
+    BASEGEOGCRS["GCS_Moon",
+        DATUM["D_Moon",
+            ELLIPSOID["Moon_localRadius",1737400,0,
+                LENGTHUNIT["metre",1,
+                    ID["EPSG",9001]]]],
+        PRIMEM["Reference_Meridian",0,
+            ANGLEUNIT["degree",0.0174532925199433,
+                ID["EPSG",9122]]]],
+    CONVERSION["Equidistant Cylindrical",
+        METHOD["Equidistant Cylindrical",
+            ID["EPSG",1028]],
+        PARAMETER["Latitude of 1st standard parallel",14,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8823]],
+        PARAMETER["Longitude of natural origin",180,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["False easting",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]]],
+    CS[Cartesian,2],
+        AXIS["easting",east,
+            ORDER[1],
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]],
+        AXIS["northing",north,
+            ORDER[2],
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]]]
+Data axis to CRS axis mapping: 1,2
+Origin = (3644392.000001099891961,430484.000000129977707)
+Pixel Size = (2.000000000000600,-2.000000000000600)
+Metadata:
+  AREA_OR_POINT=Area
+Image Structure Metadata:
+  INTERLEAVE=BAND
+Corner Coordinates:
+Upper Left  ( 3644392.000,  430484.000) ( 56d 8'10.95"W, 14d11'47.23"N)
+Lower Left  ( 3644392.000,  400664.000) ( 56d 8'10.95"W, 13d12'46.99"N)
+Upper Right ( 3658946.000,  430484.000) ( 55d38'30.20"W, 14d11'47.23"N)
+Lower Right ( 3658946.000,  400664.000) ( 55d38'30.20"W, 13d12'46.99"N)
+Center      ( 3651669.000,  415574.000) ( 55d53'20.58"W, 13d42'17.11"N)
+Band 1 Block=7277x1 Type=Float32, ColorInterp=Gray
+  NoData Value=-3.40282265508890445e+38

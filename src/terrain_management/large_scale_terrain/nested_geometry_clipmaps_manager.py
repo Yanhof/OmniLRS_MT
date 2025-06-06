@@ -11,6 +11,7 @@ import dataclasses
 import numpy as np
 import warnings
 import math
+import logging
 
 from semantics.schema.editor import PrimSemanticData
 import omni
@@ -49,6 +50,8 @@ class NestedGeometryClipmapManagerConf:
     semantic_label: str = dataclasses.field(default_factory=str)
     texture_name: str = dataclasses.field(default_factory=str)
     texture_path: str = dataclasses.field(default_factory=str)
+    terrain_world_origin_for_debug: Tuple[float, float] = (0.0, 0.0) # Default, will be overridden
+
 
     def __post_init__(self) -> None:
         """
@@ -141,6 +144,8 @@ class NestedGeometryClipmapManager:
             mesh_position=np.array([0.0, 0.0, 0.0]),
             mesh_orientation=np.array([0.0, 0.0, 0.0, 1.0]),
             mesh_scale=np.array([1.0, 1.0, 1.0]),
+            debug_roi_center_world_init=self.settings.terrain_world_origin_for_debug,
+
         )
 
     def build(
@@ -171,6 +176,15 @@ class NestedGeometryClipmapManager:
         """
 
         self.generate_geometry_clip_maps_configs(hr_dem_shape, lr_dem_shape, hr_dem_res, lr_dem_res)
+        
+        #added by Yannic
+        num_nan_hr = np.isnan(hr_dem).sum()
+        num_nan_lr = np.isnan(lr_dem).sum()
+        if num_nan_hr > 0 or num_nan_lr > 0:
+            logging.warning(f"In nested_geometry There are {num_nan_hr} nan values in hr_dem and {num_nan_lr} in lr_dem.")
+            #hr_dem = np.nan_to_num(hr_dem, nan=-1620.0)
+            #lr_dem = np.nan_to_num(lr_dem, nan=-1620.0)
+        #end of added by Yannic
 
         self.fine_clipmap_manager = GeoClipmapManager(
             self.fine_clipmap_manager_cfg,
@@ -190,6 +204,9 @@ class NestedGeometryClipmapManager:
         )
         self.fine_clipmap_manager.build(hr_dem, hr_dem_shape, dem_center=hr_dem_center)
         self.coarse_clipmap_manager.build(lr_dem, lr_dem_shape, dem_center=lr_dem_center)
+
+
+
         self.load_and_apply_material()
         self.add_semantic_label()
 

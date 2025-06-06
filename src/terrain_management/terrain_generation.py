@@ -15,6 +15,8 @@ import numpy as np
 import datetime
 import pickle
 import cv2
+import logging
+logger = logging.getLogger(__name__)
 
 from src.configurations.procedural_terrain_confs import (
     CraterGeneratorConf,
@@ -463,7 +465,10 @@ class BaseTerrainGenerator:
             min_elevation (float, optional): minimum elevation of the DEM (in meters). Defaults to -0.25.
             seed (int, optional): random seed. Defaults to 42.
             z_scale (float, optional): scale of the DEM. Defaults to 50."""
-
+        logger.debug("Initializing BaseTerrainGenerator")
+        logger.debug("---------------------------------------------------------")
+        logger.debug(f"BaseTerrainGenerator config: {cfg}")
+        logger.debug("---------------------------------------------------------")
         self._min_elevation = cfg.min_elevation
         self._max_elevation = cfg.max_elevation
         self._x_size = int(cfg.x_size / cfg.resolution)

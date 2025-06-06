@@ -1,6 +1,7 @@
 physics_scene:
   dt: 0.016666
   gravity: [0.0, 0.0, -1.62]
+  #gravity: [0.0, 0.0, -10]
   enable_ccd: true
   enable_stabilization: true
   solver_type: PGS

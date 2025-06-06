@@ -3,6 +3,7 @@ import dataclasses
 import numpy as np
 import math
 import copy
+import logging
 
 from src.configurations.environments import LargeScaleTerrainConf
 
@@ -41,7 +42,9 @@ class LargeScaleTerrainManager:
         self.last_update_coordinates = None
 
     def build_configs(self):
-        self.nested_geometric_clipmap_manager_cfg = NestedGeometryClipmapManagerConf(**self.settings.NGCMMConf_D)
+        self.nested_geometric_clipmap_manager_cfg = NestedGeometryClipmapManagerConf(**self.settings.NGCMMConf_D,
+                             terrain_world_origin_for_debug=self.settings.starting_position
+                                                                    )
         self.mapmanager_cfg = MapManagerConf(**self.settings.MMConf_D)
         self.rock_manager_cfg = RockManagerConf(**self.settings.RMConf_D)
         self.collider_manager_cfg = ColliderManagerConf(**self.settings.CMConf_D)
@@ -167,6 +170,7 @@ class LargeScaleTerrainManager:
         self.update_visual_mesh((0, 0))
 
     def update_visual_mesh(self, local_coordinates):
+
         # print("local_coordinates", local_coordinates)
         # print("last_update_coordinates", self.last_update_coordinates)
         if self.last_update_coordinates is None:

@@ -196,7 +196,7 @@ class ROS2_SimulationManager:
         # Preload the assets
         if cfg["environment"]["name"] == "LargeScale":
             height, quat = self.ROSLabManager.LC.get_height_and_normal((0.0, 0.0, 0.0))
-            self.ROSRobotManager.RM.preload_robot_at_pose(self.world, (0, 0, height + 0.5), (1, 0, 0, 0))
+            self.ROSRobotManager.RM.preload_robot_at_pose(self.world, (0, 0, height + 0.7), (1, 0, 0, 0))
         else:
             self.ROSRobotManager.RM.preload_robot(self.world)
         self.ROSLabManager.LC.add_robot_manager(self.ROSRobotManager.RM)

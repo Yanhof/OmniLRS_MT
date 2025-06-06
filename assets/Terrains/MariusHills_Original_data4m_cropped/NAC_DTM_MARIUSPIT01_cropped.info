@@ -1,0 +1,52 @@
+Driver: GTiff/GeoTIFF
+Files: ../tmp/NAC_DTM_MARIUSPIT01_cropped.tif
+Size is 2114, 2277
+Coordinate System is:
+PROJCRS["Equirectangular Moon",
+    BASEGEOGCRS["GCS_Moon",
+        DATUM["D_Moon",
+            ELLIPSOID["Moon_localRadius",1737400,0,
+                LENGTHUNIT["metre",1,
+                    ID["EPSG",9001]]]],
+        PRIMEM["Reference_Meridian",0,
+            ANGLEUNIT["degree",0.0174532925199433,
+                ID["EPSG",9122]]]],
+    CONVERSION["Equidistant Cylindrical",
+        METHOD["Equidistant Cylindrical",
+            ID["EPSG",1028]],
+        PARAMETER["Latitude of 1st standard parallel",14,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8823]],
+        PARAMETER["Longitude of natural origin",180,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["False easting",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",0,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]]],
+    CS[Cartesian,2],
+        AXIS["easting",east,
+            ORDER[1],
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]],
+        AXIS["northing",north,
+            ORDER[2],
+            LENGTHUNIT["metre",1,
+                ID["EPSG",9001]]]]
+Data axis to CRS axis mapping: 1,2
+Origin = (3621243.999998698942363,431843.999999848543666)
+Pixel Size = (3.999999999998600,-3.999999999998600)
+Metadata:
+  AREA_OR_POINT=Area
+Image Structure Metadata:
+  INTERLEAVE=BAND
+Corner Coordinates:
+Upper Left  ( 3621244.000,  431844.000) ( 56d55'23.22"W, 14d14'28.69"N)
+Lower Left  ( 3621244.000,  422736.000) ( 56d55'23.22"W, 13d56'27.38"N)
+Upper Right ( 3629700.000,  431844.000) ( 56d38' 8.59"W, 14d14'28.69"N)
+Lower Right ( 3629700.000,  422736.000) ( 56d38' 8.59"W, 13d56'27.38"N)
+Center      ( 3625472.000,  427290.000) ( 56d46'45.91"W, 14d 5'28.04"N)
+Band 1 Block=2114x1 Type=Float32, ColorInterp=Gray
+  NoData Value=-3.40282265508890445e+38

@@ -57,8 +57,10 @@ class InterpolatorConf:
                 logger.warn("Bicubic interpolation with downscaling. Consider using a different method.")
         elif self.method == "nearest":
             self.method = cv2.INTER_NEAREST
+            logger.warn("Usinf nearest neighbor interpolation")
         elif self.method == "linear":
             self.method = cv2.INTER_LINEAR
+            logger.warn("Using linear interpolation")
         elif self.method == "area":
             self.method = cv2.INTER_AREA
             if self.fx > 1.0:

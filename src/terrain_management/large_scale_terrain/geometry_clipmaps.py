@@ -12,6 +12,7 @@ import numpy as np
 import warp as wp
 import hashlib
 import os
+import logging
 
 from src.terrain_management.large_scale_terrain.geometry_clipmaps_numba import (
     _build_mesh,
@@ -172,6 +173,7 @@ class GeoClipmap:
         """
 
         data = np.load(self.specs.meshBackBonePath)
+        logging.info("Loading mesh backbone from %s", self.specs.meshBackBonePath)
         if data["specs_hash"] != self.specs_hash:
             self.build_mesh()
             self.save_mesh()

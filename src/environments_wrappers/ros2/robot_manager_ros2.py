@@ -7,6 +7,7 @@ __email__ = "antoine.richard@uni.lu"
 __status__ = "development"
 
 from typing import List, Tuple
+import scripts.GNC.change_cameras as cam_utils
 
 from pxr import Gf
 
@@ -26,6 +27,26 @@ class ROS_RobotManager(Node):
         super().__init__("Robot_spawn_manager_node")
         self.RM = RobotManager(RM_conf)
 
+
+        # --- Add Camera ROS 2 Subscribers ---
+        # Topic to set a specific camera MODEL on all cameras
+        self.create_subscription(
+            String,
+            '/lunar_leaper/camera/set_model', # Expects String message data = model name (e.g., "3DPlus8mm")
+            self._set_camera_model_cb,
+            1 # Queue size
+        )
+
+        # Topic to apply ALL predefined camera POSES from CAMERA_POSITIONS
+        # Can use String (data ignored) or Empty for simple trigger
+        self.create_subscription(
+            String, # Use String for consistency, data can be anything
+            '/lunar_leaper/camera/apply_predefined_poses', # Trigger to apply all poses from CAMERA_POSITIONS
+            self._apply_predefined_poses_cb,
+            1 # Queue size
+        )
+        # --- End Camera ROS 2 Subscribers ---
+
         self.create_subscription(PoseStamped, "/OmniLRS/Robots/Spawn", self.spawn_robot, 1)
         self.create_subscription(PoseStamped, "/OmniLRS/Robots/Teleport", self.teleport_robot, 1)
         self.create_subscription(String, "/OmniLRS/Robots/Reset", self.reset_robot, 1)
@@ -33,6 +54,44 @@ class ROS_RobotManager(Node):
 
         self.domain_id = 0
         self.modifications: List[Tuple[callable, dict]] = []
+
+    # --- New Camera ROS 2 Callback Methods ---
+    def _set_camera_model_cb(self, msg: String) -> None:
+        """
+        Callback for the /lunar_leaper/camera/set_model topic.
+        Applies the camera model specified in the message data to all cameras.
+        Message data should be the model name (e.g., "3DPlus8mm").
+        Calls lunar_leaper_camera_utils.apply_camera_model_to_all.
+        """
+        model_name = msg.data.strip()
+
+        # Call the utility function from the imported module
+        cam_utils.apply_camera_model_to_all(
+            model_name,
+            cam_utils.CAMERA_PRIM_PATHS,
+            cam_utils.RENDER_PRODUCT_PRIM_PATHS
+        )
+
+
+    def _apply_predefined_poses_cb(self, msg: String) -> None: # Changed msg type to String for consistency
+        """
+        Callback for the /lunar_leaper/camera/apply_predefined_poses topic.
+        Triggers the application of ALL predefined poses from CAMERA_POSITIONS
+        to their respective cameras. Message data is ignored.
+        Calls lunar_leaper_camera_utils.change_all_camera_positions_and_orientations.
+        """
+ 
+        # Call the utility function from the imported module to apply all poses
+        # Pass the full CAMERA_POSITIONS dictionary to change_all_camera_positions_and_orientations
+        cam_utils.change_all_camera_positions_and_orientations(
+            cam_utils.CAMERA_PRIM_PATHS,
+            cam_utils.CAMERA_POSITIONS # Pass the dictionary containing poses for FR and FL
+        )
+
+
+
+    # --- End New Camera ROS 2 Callback Methods ---
+
 
     def reset(self) -> None:
         """

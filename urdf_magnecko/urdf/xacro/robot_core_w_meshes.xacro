@@ -1,0 +1,430 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+    <xacro:include filename="inertial_macros.xacro"/>
+
+
+    <!-- __________________________________________________________ -->
+    <!--                      Properties                            -->
+    <!-- __________________________________________________________ -->
+    <xacro:property name="XACRO_DIR" value="$(cwd)/${xacro.abs_filename('.')}" />
+
+    <!--body dimensions-->
+    <xacro:property name="length_body" value="0.26" />
+    <xacro:property name="width_body" value="0.26" />
+    <xacro:property name="height_body" value="0.088" />
+
+    <!-- leg dimensions -->
+    <xacro:property name="length_upper_leg" value="0.18" />
+    <xacro:property name="length_lower_leg" value="0.2198" />
+    <xacro:property name="radius_upper_leg" value="0.03" />
+    <xacro:property name="radius_lower_leg" value="0.02" />
+    <xacro:property name="ball_foot_radius" value="0.01975" />
+    <xacro:property name="ball_foot_offset" value="0.0118" />
+
+    <!-- actuator dimensions -->
+    <xacro:property name="actuator_radius" value="${0.072/2}" />
+    <xacro:property name="actuator_length" value="0.07" />
+
+    <!--mass-->
+    <xacro:property name="mass_hip_joint" value="0.7" />
+    <xacro:property name="mass_body" value="2.5" />
+    <xacro:property name="mass_upper_leg" value="1.2" />
+    <xacro:property name="mass_lower_leg" value="0.6" />
+    <xacro:property name="mass_foot" value="0.001" />
+
+    <!--joint properties-->
+    <xacro:property name="joint_effort" value="35.0" />
+    <xacro:property name="joint_velocity" value="40.0" />
+    <xacro:property name="joint_damping" value="0.0" />
+    <xacro:property name="joint_friction" value="0.0" />
+
+    <!-- physic properties -->
+    <xacro:property name="friction" value="0.7" />
+    <xacro:property name="slip" value="0.0" />
+
+    <!-- joint limits -->
+    <!-- yaw limit +/- 90deg -->
+    <xacro:property name="yaw_lim_upper" value="${pi/2}" />
+    <xacro:property name="yaw_lim_lower" value="${-pi/2}" />
+    <!-- pitch limit  [-135deg, 70deg] -->
+    <xacro:property name="pitch_lim_upper" value="1.22173" />
+    <xacro:property name="pitch_lim_lower" value="-2.35619" />
+    <!-- knee limit +/- 135 deg -->
+    <xacro:property name="knee_lim_upper" value="2.531" />
+    <xacro:property name="knee_lim_lower" value="-2.531" /> 
+
+    <!-- mesh paths -->
+    <xacro:property name="body_mesh" value="file://${XACRO_DIR}/../meshes/body.stl" />
+    <xacro:property name="hip_FL_BR_mesh" value="file://${XACRO_DIR}/../meshes/hip_FL_BR.stl" />
+    <xacro:property name="hip_FR_BL_mesh" value="file://${XACRO_DIR}/../meshes/hip_FR_BL.stl" />
+    <xacro:property name="upper_leg_mesh" value="file://${XACRO_DIR}/../meshes/upper_leg.stl" />
+    <xacro:property name="lower_leg_mesh" value="file://${XACRO_DIR}/../meshes/lower_leg_v2.stl" />
+    <xacro:property name="upper_ankle_mesh" value="file://${XACRO_DIR}/../meshes/upper_ankle_joint.stl" />
+    <xacro:property name="center_ankle_mesh" value="file://${XACRO_DIR}/../meshes/center_ankle_joint.stl" />
+    <xacro:property name="foot_mesh" value="file://${XACRO_DIR}/../meshes/foot.stl" />
+
+
+    <!-- __________________________________________________________ -->
+    <!--                      LEG MACRO                             -->
+    <!-- __________________________________________________________ -->
+    <xacro:macro name="leg" params="prefix x y z yaw">
+
+    <!-- Differen bracket for FL,BR and FR,BL legs -->
+    <xacro:if value="${prefix=='second' or prefix=='fourth'}">
+        <xacro:property name="hip_mesh" value="${hip_FR_BL_mesh}" />
+        <xacro:property name="leg_mount_orientation" value="${pi}" />
+        <xacro:property name="leg_mount_y" value="-0.0273" />
+        <xacro:property name="knee_collision_shif" value="0.015" />
+        <xacro:property name="foot_collision_shift_y" value="0.013" />
+        <xacro:property name="foot_collision_shift_z" value="0.0" />
+        <xacro:property name="lower_leg_angle_shift" value="8.5" />
+        <xacro:property name="lower_leg_shift" value="-0.002" />
+    </xacro:if>
+    <xacro:if value="${prefix=='first' or prefix=='third'}">
+        <xacro:property name="hip_mesh" value="${hip_FL_BR_mesh}" />
+        <xacro:property name="leg_mount_orientation" value="0.0" />
+        <xacro:property name="leg_mount_y" value="0.0273" />
+        <xacro:property name="knee_collision_shif" value="-0.015" />
+        <xacro:property name="foot_collision_shift_y" value="-0.013" />
+        <xacro:property name="foot_collision_shift_z" value="-0.0" />
+        <xacro:property name="lower_leg_angle_shift" value="-8.5" />
+        <xacro:property name="lower_leg_shift" value="0.002" />
+    </xacro:if>
+        
+    <joint name="${prefix}_arm_yaw" type="revolute">
+        <parent link="base"/>
+        <child link="${prefix}_arm_link"/>
+        <origin xyz="${x} ${y} ${z}" rpy="0 0 ${yaw}" />
+        <axis xyz="0 0 1"/>
+        <dynamics damping="${joint_damping}" friction="${joint_friction}"/>
+        <limit effort="${joint_effort}" velocity="${joint_velocity}" lower="${yaw_lim_lower}" upper="${yaw_lim_upper}"/>
+    </joint>
+
+    <link name="${prefix}_arm_link">
+        <visual>
+            <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="${hip_mesh}" scale=".0010 .0010 .0010"/>
+            </geometry>
+            <material name="aluminum"/>
+        </visual>
+
+        <xacro:if value="${prefix=='first' or prefix=='third'}">
+            <inertial>
+                <origin xyz="0.0296 0.01059 0.01002"/>
+                <mass value="0.2631" />
+                <inertia ixx="0.000175" iyy="0.000383" izz="0.000318"
+                        iyz="0.0000432" ixz="0.000141" ixy="0.0000621"/>
+            </inertial>
+        </xacro:if>
+        <xacro:if value="${prefix=='second' or prefix=='fourth'}">
+            <inertial>
+                <origin xyz="0.0296 -0.01059 0.01002"/>
+                <mass value="0.2631" />
+                <inertia ixx="0.000175" iyy="0.000383" izz="0.000318"
+                        iyz="-0.0000432" ixz="0.000141" ixy="-0.0000621"/>
+            </inertial>
+        </xacro:if>
+    </link>
+
+    <joint name="${prefix}_arm_pitch" type="revolute">
+        <parent link="${prefix}_arm_link"/>
+        <child link="${prefix}_arm"/>
+        <origin xyz="0.06 ${leg_mount_y} 0.02884" rpy="0 0 0" />
+        <axis xyz="0 1 0"/>
+        <dynamics damping="${joint_damping}" friction="${joint_friction}"/>
+        <limit effort="${joint_effort}" velocity="${joint_velocity}" lower="${pitch_lim_lower}" upper="${pitch_lim_upper}"/>
+    </joint>
+
+    <link name="${prefix}_arm">
+        <visual>
+            <origin xyz="0 0 0" rpy="${leg_mount_orientation} 0 0" />
+            <geometry>
+                <mesh filename="${upper_leg_mesh}" scale=".0010 .0010 .0010"/>
+            </geometry>
+            <material name="aluminum"/>
+        </visual>
+        <collision>
+            <origin xyz="${length_upper_leg} ${knee_collision_shif} 0" rpy="${pi/2} 0 0" />
+            <geometry>
+                <cylinder radius="${actuator_radius}" length="${actuator_length}"/>
+            </geometry>
+        </collision>
+        <xacro:if value="${prefix=='first' or prefix=='third'}">
+            <inertial>
+                <origin xyz="0.0899 -0.0279 0.0000748"/>
+                <mass value="1.0701" />
+                <inertia ixx="0.000587" iyy="0.00756" izz="0.00753"
+                        iyz="0.00000338" ixz="0.00000331" ixy="0.00000134"/>
+            </inertial>
+        </xacro:if>
+        <xacro:if value="${prefix=='second' or prefix=='fourth'}">
+            <inertial>
+                <origin xyz="0.0899 0.0279 0.0000748"/>
+                <mass value="1.0701" />
+                <inertia ixx="0.000587" iyy="0.00756" izz="0.00753"
+                        iyz="-0.00000338" ixz="0.00000331" ixy="-0.00000134"/>
+            </inertial>
+        </xacro:if>
+    </link>
+
+    <joint name="${prefix}_knee_joint" type="revolute">
+        <parent link="${prefix}_arm"/>
+        <child link="${prefix}_knee"/>
+        <origin xyz="0.18 0.0 0.0" rpy="0 0 0" />
+        <axis xyz="0 1 0"/>
+        <dynamics damping="${joint_damping}" friction="${joint_friction}"/>
+        <limit effort="${joint_effort}" velocity="${joint_velocity}" lower="${knee_lim_lower}" upper="${knee_lim_upper}"/>
+    </joint>
+
+    <link name="${prefix}_knee">
+        <visual>
+            <origin xyz="0 0 0" rpy="${leg_mount_orientation} 0 0" />
+            <geometry>
+                <mesh filename="${lower_leg_mesh}" scale=".0010 .0010 .0010"/>
+            </geometry>
+            <material name="dark_grey"/>
+        </visual>
+        <collision>
+            <origin xyz="${0.73*length_lower_leg/2 + 1.1*actuator_radius} ${lower_leg_shift} 0" rpy="0 ${pi/2} ${lower_leg_angle_shift*pi/180}" />
+            <geometry>
+                <cylinder radius="${0.8*radius_lower_leg}" length="${0.73*length_lower_leg}"/>
+            </geometry>
+        </collision>
+        <xacro:if value="${prefix=='first' or prefix=='third'}">
+            <inertial>
+                <origin xyz="0.0450 -0.00333 0.0"/>
+                <mass value="0.2009" />
+                <inertia ixx="0.0000645" iyy="0.00113" izz="0.00114"
+                        iyz="0.0" ixz="0.0" ixy="-0.0000281"/>
+            </inertial>
+        </xacro:if>
+        <xacro:if value="${prefix=='second' or prefix=='fourth'}">
+            <inertial>
+                <origin xyz="0.0450 0.00333 0.0"/>
+                <mass value="0.2009" />
+                <inertia ixx="0.0000645" iyy="0.00113" izz="0.00114"
+                        iyz="0.0" ixz="0.0" ixy="0.0000281"/>
+            </inertial>
+        </xacro:if>
+    </link>
+
+    
+    <xacro:if value="$(arg use_ballfeet)">
+        <joint name="${prefix}_foot_joint" type="fixed" dont_collapse="true">
+            <parent link="${prefix}_knee"/>
+            <child link="${prefix}_foot"/>
+            <origin xyz="${length_lower_leg + ball_foot_offset} ${foot_collision_shift_y} ${foot_collision_shift_z}" rpy="0.0 0.0 0.0" />
+        </joint>
+
+        <link name="${prefix}_foot">
+            <collision>
+                <max_contacts>1</max_contacts>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <sphere radius="${ball_foot_radius}"/>
+                </geometry>
+            </collision>
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <sphere radius="${ball_foot_radius}"/>
+                </geometry>
+                <material name="dark_grey"/>
+            </visual>
+        </link>
+    </xacro:if>
+    <xacro:unless value="$(arg use_ballfeet)">
+
+        <joint name="${prefix}_ankle_yaw" type="revolute">
+            <parent link="${prefix}_knee"/>
+            <child link="${prefix}_ankle_link_1"/>
+            <origin xyz="${length_lower_leg} ${foot_collision_shift_y} ${foot_collision_shift_z}" rpy="0.0 0.0 0.0" />
+            <axis xyz="1 0 0"/>
+            <dynamics damping="0.01" friction="0.01"/>
+            <limit effort="${joint_effort}" velocity="${joint_velocity}" lower="${-pi/2}" upper="${pi/2}"/>
+        </joint>
+
+        <link name="${prefix}_ankle_link_1">
+            <inertial>
+                <origin xyz="0.0 0.0 0.0"/>
+                <mass value="0.005" />
+                <inertia ixx="0.0" iyy="0.0" izz="0.0"
+                        iyz="0.0" ixz="0.0" ixy="0.0"/>
+            </inertial>
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <mesh filename="${upper_ankle_mesh}" scale=".0010 .0010 .0010"/>
+                </geometry>
+                <material name="light_grey"/>
+            </visual>
+        </link>
+
+        <joint name="${prefix}_ankle_pitch" type="revolute">
+            <parent link="${prefix}_ankle_link_1"/>
+            <child link="${prefix}_ankle_link_2"/>
+            <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
+            <axis xyz="0 0 1"/>
+            <dynamics damping="0.01" friction="0.01"/>
+            <limit effort="${joint_effort}" velocity="${joint_velocity}" lower="${-pi/4}" upper="${pi/4}"/>
+        </joint>
+
+        <link name="${prefix}_ankle_link_2">
+            <inertial>
+                <origin xyz="0.0 0.0 0.0"/>
+                <mass value="0.005" />
+                <inertia ixx="0.0" iyy="0.0" izz="0.0"
+                        iyz="0.0" ixz="0.0" ixy="0.0"/>
+            </inertial>
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <mesh filename="${center_ankle_mesh}" scale=".0010 .0010 .0010"/>
+                </geometry>
+                <material name="light_grey"/>
+            </visual>
+        </link>
+
+        <joint name="${prefix}_ankle_roll" type="revolute">
+            <parent link="${prefix}_ankle_link_2"/>
+            <child link="${prefix}_foot"/>
+            <origin xyz="0 0 0" rpy="0.0 0.0 0.0" />
+            <axis xyz="0 1 0"/>
+            <dynamics damping="0.01" friction="0.01"/>
+            <limit effort="${joint_effort}" velocity="${joint_velocity}" lower="${-pi/4}" upper="${pi/4}"/>
+        </joint>
+
+        <link name="${prefix}_foot">
+            <collision>
+                <origin xyz="0.0219 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="0.02 0.0645 0.0645"/>
+                </geometry>
+            </collision>
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <mesh filename="${foot_mesh}" scale=".0010 .0010 .0010"/>
+                </geometry>
+                <material name="light_grey"/>
+            </visual>
+            <inertial>
+                <origin xyz="0.018 0.0 0.0"/>
+                <mass value="0.180" />
+                <inertia ixx="0.000105" iyy="0.00007" izz="0.00007"
+                        iyz="0.0" ixz="0.0" ixy="0.0"/>
+            </inertial>
+        </link>
+    </xacro:unless>
+
+    
+    </xacro:macro>
+
+
+
+
+    <!-- __________________________________________________________ -->
+    <!--                     Robot Description                      -->
+    <!-- __________________________________________________________ -->
+
+    <!-- base link -->
+    <link name="base">
+        <visual>
+            <origin xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="${body_mesh}" scale=".0010 .0010 .0010"/>
+            </geometry>
+            <material name="grey"/>
+        </visual>
+
+        <collision>
+            <max_contacts>4</max_contacts>
+            <origin xyz="0 0 ${height_body/2}"/>
+            <geometry>
+                <box size="${length_body - actuator_radius} ${width_body - actuator_radius} ${height_body}"/>
+            </geometry>
+            <surface>
+                <friction>
+                    <ode>
+                        <mu>0.1</mu>
+                        <mu2>0.1</mu2>
+                        <slip1>1e-9</slip1>
+                        <slip2>1e-9</slip2>
+                    </ode>
+                </friction>
+      <contact>
+          <ode>
+            <kp>1e15</kp>
+            <kd>1e13</kd>
+          </ode>
+        </contact>
+    </surface>
+        </collision>
+        <inertial>
+            <origin xyz="-0.00582 0.00125 0.0299"/>
+            <mass value="4.505" />
+            <inertia ixx="0.0394" iyy="0.0430" izz="0.0788"
+                     iyz="0.000321" ixz="0.0000382" ixy="0.0000568"/>
+        </inertial>
+    </link>
+
+    <!-- Depth Camera -->
+    <joint name="camera_joint" type="fixed" dont_collapse="true">
+        <parent link="base"/>
+        <child link="camera_link"/>
+        <origin xyz="0.0588 0.0175 0.102" rpy="0 0 0"/>
+    </joint>
+
+    <link name="camera_link">
+        <visual>
+            <origin xyz="-0.0125 -0.0175 0" rpy="0 0 0" />
+            <geometry>
+                <box size="0.025 0.09 0.024"/>
+            </geometry>
+            <material name="light_grey"/>
+        </visual>
+    </link>
+
+    <joint name="camera_optical_joint" type="fixed" dont_collapse="true">
+        <parent link="camera_link"/>
+        <child link="camera_link_optical"/>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    </joint>
+
+    <link name="camera_link_optical"></link>
+
+    <!-- IMU -->
+    <joint name="imu_joint" type="fixed" dont_collapse="true">
+        <parent link="base"/>
+        <child link="imu_link"/>
+        <origin xyz="-0.08 0.08 0.05" rpy="0 ${pi} 0"/>
+    </joint>
+
+    <link name="imu_link">
+    </link>
+    
+
+    <!-- First Arm -->
+    <xacro:leg prefix="first" x="${length_body/2}" y="${width_body/2}" z="0.0545" yaw="${pi/4}">
+    </xacro:leg>
+    
+
+    <!-- Second Arm -->
+    <xacro:leg prefix="second" x="${length_body/2}" y="${-width_body/2}" z="0.0545" yaw="${-pi/4}">
+    </xacro:leg>
+    
+    
+    <!-- Third Arm -->
+    <xacro:leg prefix="third" x="${-length_body/2}" y="${-width_body/2}" z="0.0545" yaw="${-pi/4 - pi/2}">
+    </xacro:leg>
+    
+    
+    <!-- Fourth Arm -->
+    <xacro:leg prefix="fourth" x="${-length_body/2}" y="${width_body/2}" z="0.0545" yaw="${-pi/4 - pi}">
+    </xacro:leg>
+
+
+
+</robot>

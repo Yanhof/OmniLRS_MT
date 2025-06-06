@@ -55,7 +55,7 @@ class AutoLabelingConf:
         for camera_name in self.camera_names:
             assert type(camera_name) is str, "camera_name must be a string"
         for camera_resolution in self.camera_resolutions:
-            assert type(camera_resolution) is tuple, "camera_resolution must be a tuple"
+#            assert type(camera_resolution) is tuple, "camera_resolution must be a tuple"
             assert len(camera_resolution) == 2, "camera_resolution must be a tuple of length 2"
         for annotator in self.annotators_list:
             assert type(annotator) is list, "annotator_list must be a list"
