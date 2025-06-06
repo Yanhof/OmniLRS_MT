@@ -174,7 +174,7 @@ class LargeScaleTerrainConf:
     geo_cm_fine_interpolation_method: str = "bilinear"
     geo_cm_coarse_interpolation_method: str = "bicubic" 
     geo_cm_fine_acceleration_mode: str = "hybrid"
-    geo_cm_coarse_acceleration_mode: str = "hybrid"
+    geo_cm_coarse_acceleration_mode: str = "gpu"
     geo_cm_apply_smooth_shading: bool = False
     geo_cm_semantic_label: str = "terrain"
     geo_cm_texture_name: str = "LunarRegolith8k"
