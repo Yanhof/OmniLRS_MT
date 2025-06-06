@@ -75,7 +75,7 @@ class StellarEngine:
         Args:
             date (float): The current time of the observer. The given is given in seconds in the UTC time zone.
         """
-        self.last_update = datetime.datetime.fromtimestamp(date, datetime.timezone.utc) #added fix
+        self.last_update = datetime.datetime.fromtimestamp(date, datetime.timezone.utc) #Fix to avoid time_deltat in update being negative
         self.current_time = datetime.datetime.fromtimestamp(date, datetime.timezone.utc)
         self.t = self.ts.from_datetime(self.current_time)
         logging.debug(f"StellarEngine: current time set to {self.current_time} and date set to {date}")
