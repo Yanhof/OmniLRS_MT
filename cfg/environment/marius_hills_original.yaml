@@ -155,14 +155,14 @@ stellar_engine_settings:
 # Sun settings (copy as is)
 sun_settings:
   intensity: 1750.0 #need to tune
-  angle: 0.53 #is actually value as seen from earth
+  angle: 0.53 #is actually value as seen from earth, but additional distance to moon is negligible
   diffuse_multiplier: 1.0
   specular_multiplier: 1.0
-  color: [1.0, 1.0, 1.0]
-  temperature: 5900.0 #effective according to NASA 5772K, was 6500K, problem is this is the blackbody and 6500 is for earth standard sun light
-  #5900 from wikipedia but source no longer available
-  azimuth: 180.0
-  elevation: 45.0
+  color: [1.0, 0.953,0.918] #See Notion why, is decimal of each channel
+  temperature: 5900.0 #effective according to NASA 5772K, was 6500K which is daylight on earth, problem is this is the blackbody and 6500 is for earth standard sun light
+  #5900 from wikipedia 
+  azimuth: 180.0 #overwritten by stellarengine
+  elevation: 45.0 #overwritten by stellarengine
 
 
 
@@ -180,8 +180,8 @@ robots_settings:
       #usd_path: assets/USD_Assets/robots/ros2_jackal_PhysX_vlp16_stereo.usd
       robot_name: LL
       #2ROS CAMS
-      usd_path: assets/USD_Assets/robots/lunar_leaper_2cams_2ROS_dimensions_adapted_150mm_clearance_mass12_7_wider_wheels_further_back_removed_lidar_removed_exisitng_stereo_cam__physics_material_solar_gpr_legs_v12.usd
-      #usd_path: assets/USD_Assets/robots/LL_sensing_camera_investigation.usd
+      #usd_path: assets/USD_Assets/robots/lunar_leaper_2cams_2ROS_dimensions_adapted_150mm_clearance_mass12_7_wider_wheels_further_back_removed_lidar_removed_exisitng_stereo_cam__physics_material_solar_gpr_legs_v13.usd
+      usd_path: assets/USD_Assets/robots/LL_v15.usd
       pose:
         position: [1050, 400, 0] #is ignored in largescale use starting_position above
         orientation: [1, 0, 0, 0] #is ignored in largescale
