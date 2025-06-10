@@ -15,6 +15,21 @@
             "cwd": "${workspaceFolder}" 
         },
         {
+            "name": "Marius Hills Headless",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/run.py",
+            "console": "integratedTerminal",
+            "args": [
+                "environment=marius_hills_original",
+                "rendering.renderer.headless=true" 
+      
+            ],
+            "envFile": "${workspaceFolder}/.env",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false
+        },
+        {
             "name": "Lunalab",
             "type": "python",
             "request": "launch",

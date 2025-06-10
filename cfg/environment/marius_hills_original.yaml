@@ -22,7 +22,7 @@ large_scale_terrain:
 
   #started to change the settings for the large scale terrain, default values see environments.py
   geo_cm_coarse_interpolation_method: "bicubic" 
-  geo_cm_target_res: 0.02 #0.02
+  geo_cm_target_res: 0.025 #0.02
   hr_dem_resolution: 0.025 #0.025
   geo_cm_fine_interpolation_method: "bicubic"
   hr_dem_num_blocks: 4 #block_span for the rocks below needs to lower than this
@@ -34,8 +34,8 @@ large_scale_terrain:
 
 
   #starting poisition need to be multiple of block size
-  starting_position: [480, -660] #is near pit for block size 20
-  #starting_position: [480,-580] #is near pit edge for block size 20
+  #starting_position: [480, -660] #is near pit for block size 20
+  starting_position: [480,-580] #is near pit edge for block size 20
   #starting_position: [260,-700] #is near landing zone for block size 20
   #starting_position: [500,-520] #is in pit for block size 40
   #starting_position: [440,-560] #is near pit for block size 40
