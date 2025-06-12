@@ -21,6 +21,8 @@ front_z = 0.0
 front_inward_rotation = 0 # positive is inwards for FR, is y axis
 front_upward_rotation = 0 #positive is upwards for FR, is x axis
 
+#fps for the cameras
+CAMERA_FPS = 1
 
 # -------- Camera Prim Paths --------
 CAMERA_PRIM_PATHS = {
