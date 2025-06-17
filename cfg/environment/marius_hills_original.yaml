@@ -2,7 +2,7 @@
 
 name: LargeScale # Keep this as LargeScale as it defines the environment type
 seed: 42 # You can change this seed if you want a different procedural generation overlay
-physics_dt: 0.0166 #0.01666 # 
+physics_dt: 0.0333 # # 
 rendering_dt: 0.0333 #0.0333 # 30 Hz
 enforce_realtime: true #if true uses the physics_dt
 
@@ -16,7 +16,7 @@ large_scale_terrain:
   #lr_dem_folder_path: "assets/Terrains/MariusHills_pit_40m_depth_gradual" # DEM with 40m bottom going in step of 20m down
   #lr_dem_folder_path: "assets/Terrains/MariusHills_pit_40m_depth_gradual_slow" # DEM with 40m bottom going in step of 10m down
   #lr_dem_folder_path: "assets/Terrains/MariusHills_nan_set_-1620_all" # DEM where set all nan to -1620, which is roughly 40m below edge
-  lr_dem_folder_path: "assets/Terrains/MH_-1620_up_8x_bilinear_loc_bicubic_glob"
+  lr_dem_folder_path: "assets/Terrains/MH_-1620_up_8x_bilinear_loc_bicubic_glob_8000_size" 
   lr_dem_name: "DM1" # The subolfder name of the DEM folder
   block_size: 20 # 20 works for no padding, 40 also 80 also but takes long. 
 
@@ -71,7 +71,7 @@ large_scale_terrain:
       rock_assets_folder: "assets/USD_Assets/rocks/lunar_rocks/rocks_s2_r128"
       instancer_name: "very_small_rock_instancer"
       seed: 5
-      block_span: 4
+      block_span: 2
       add_colliders: False
     -
       rock_sampler_cfg:
@@ -92,7 +92,7 @@ large_scale_terrain:
       rock_assets_folder: "assets/USD_Assets/rocks/lunar_rocks/rocks_s3_r512"
       instancer_name: "small_rock_instancer"
       seed: 51
-      block_span: 4
+      block_span: 2
       add_colliders: True
       collider_mode: "meshSimplification"
     -
@@ -114,7 +114,7 @@ large_scale_terrain:
       rock_assets_folder: "assets/USD_Assets/rocks/lunar_rocks/rocks_s4_r512"
       instancer_name: "medium_rock_instancer"
       seed: 52
-      block_span: 4
+      block_span: 2
       add_colliders: True
       collider_mode: "meshSimplification"
     -
@@ -136,7 +136,7 @@ large_scale_terrain:
       rock_assets_folder: "assets/USD_Assets/rocks/lunar_rocks/rocks_s5_r1024"
       instancer_name: "large_rock_instancer"
       seed: 53
-      block_span: 4
+      block_span: 2
       add_colliders: True
       collider_mode: "meshSimplification"
 

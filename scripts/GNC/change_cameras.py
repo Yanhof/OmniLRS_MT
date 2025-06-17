@@ -2,8 +2,8 @@ import logging
 from omni.isaac.core.utils.prims import get_prim_at_path
 from pxr import UsdGeom, Usd
 import omni.kit.viewport.utility
-from omni.isaac.core.utils.viewports import create_viewport_for_camera
 from omni.isaac.sensor.scripts.camera import Camera
+import omni.kit.commands
 
 
 #For now only really setup for front cameras
@@ -175,13 +175,13 @@ CAMERA_MODELS = {
         focal_length=2.1,
         focus_distance=5, #unknown
         fstop=1.9,
-        horizontal_aperture=4.8,
-        vertical_aperture=3.6,
+        horizontal_aperture=8.611276135,
+        vertical_aperture=4.697444368,
         horizontal_aperture_offset=0.0,
         vertical_aperture_offset=0.0,
         clipping_rangeX=0.05,
         clipping_rangeY=100000.0,
-        projectionType="fisheyeEquidistant",
+        projectionType="pinhole",
         NominalWidth=1280.0,
         NominalHeight=960.0,
         OpticalCenterX=640,
@@ -211,8 +211,8 @@ CAMERA_MODELS = {
         focal_length=3.8,
         focus_distance=5, #unknown
         fstop=2.8,
-        horizontal_aperture=6.11888,
-        vertical_aperture=4.58916,
+        horizontal_aperture=5.831685109,
+        vertical_aperture=4.749007075,
         horizontal_aperture_offset=0.0,
         vertical_aperture_offset=0.0,
         clipping_rangeX=0.05,
@@ -229,13 +229,13 @@ CAMERA_MODELS = {
         focal_length=7.9,
         focus_distance=5, #unknown
         fstop=8.0,
-        horizontal_aperture=11.264,
-        vertical_aperture=11.264,
+        horizontal_aperture=13.25777417,
+        vertical_aperture=13.25777417,
         horizontal_aperture_offset=0.0,
         vertical_aperture_offset=0.0,
         clipping_rangeX=0.05,
         clipping_rangeY=100000.0,
-        projectionType="fisheyeEquidistant",
+        projectionType="pinhole",
         NominalWidth=2048,
         NominalHeight=2048,
         OpticalCenterX=1024,
@@ -247,13 +247,13 @@ CAMERA_MODELS = {
         focal_length=11.6,
         focus_distance=5, #unknown
         fstop=9.0,
-        horizontal_aperture=11.264,
-        vertical_aperture=11.264,
+        horizontal_aperture=12.33565881,
+        vertical_aperture=12.33565881,
         horizontal_aperture_offset=0.0,
         vertical_aperture_offset=0.0,
         clipping_rangeX=0.05,
         clipping_rangeY=100000.0,
-        projectionType="fisheyeEquisolid",
+        projectionType="pinhole",
         NominalWidth=2048,
         NominalHeight=2048,
         OpticalCenterX=1024,
@@ -265,13 +265,13 @@ CAMERA_MODELS = {
         focal_length=25,
         focus_distance=5, #unknown
         fstop=6.0,
-        horizontal_aperture=11.264,
-        vertical_aperture=11.264,
+        horizontal_aperture=11.08473313,
+        vertical_aperture=11.08473313,
         horizontal_aperture_offset=0.0,
         vertical_aperture_offset=0.0,
         clipping_rangeX=0.05,
         clipping_rangeY=100000.0,
-        projectionType="fisheyeOrthographic",
+        projectionType="pinhole",
         NominalWidth=2048,
         NominalHeight=2048,
         OpticalCenterX=1024,
@@ -283,8 +283,8 @@ CAMERA_MODELS = {
         focal_length=50,
         focus_distance=5, #unknown
         fstop=4.0,
-        horizontal_aperture=11.264,
-        vertical_aperture=11.264,
+        horizontal_aperture=10.95178117,
+        vertical_aperture=10.95178117,
         horizontal_aperture_offset=0.0,
         vertical_aperture_offset=0.0,
         clipping_rangeX=0.05,
@@ -359,6 +359,33 @@ def apply_camera_model_to_all(model_name: str, camera_paths: dict, render_produc
         except Exception as e:
             logging.error(f"[ERROR] Failed to set resolution for viewport: {e}")
         '''
+
+        #also change render setting for f-stop
+        omni.kit.commands.execute(
+            "ChangeSetting",
+            path="/rtx/post/tonemap/fNumber",
+            value=model.fStop
+        )
+
+        #change setting of depth part for camera to make work with pinhole cameras
+        omni.kit.commands.execute(
+            "ChangeSetting",
+            path="/rtx/post/dof/enabled",
+            value=True
+        )
+        omni.kit.commands.execute(
+            "ChangeSetting",
+            path="/rtx/post/dof/focalLength",
+            value=model.focal_length    # in millimeters
+        )
+        omni.kit.commands.execute(
+            "ChangeSetting",
+            path="/rtx/post/dof/fNumber",
+            value=model.fStop    # e.g. f/8
+        )
+
+
+
         print_camera_parameters(cam_path)  # Print camera parameters after applying the model
 
 
