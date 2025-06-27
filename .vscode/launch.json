@@ -67,6 +67,6 @@
             "envFile": "/workspace/omnilrs/.env", 
             "justMyCode": false, 
             "cwd": "${workspaceFolder}" 
-        },
+        }
     ]
 }

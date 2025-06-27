@@ -383,9 +383,13 @@ def apply_camera_model_to_all(model_name: str, camera_paths: dict, render_produc
             path="/rtx/post/dof/fNumber",
             value=model.fStop    # e.g. f/8
         )
-
-
-
+        omni.kit.commands.execute('ChangeSetting',
+            path='/rtx/post/dof/overrideEnabled',
+            value=True) # Enable the override for depth of field settings
+        omni.kit.commands.execute('ChangeSetting',
+            path='/rtx/post/histogram/enabled',
+            value=True) # To enable auto exposure for the cameras
+ 
         print_camera_parameters(cam_path)  # Print camera parameters after applying the model
 
 
