@@ -181,7 +181,7 @@ robots_settings:
       robot_name: LL
       #2ROS CAMS
       #usd_path: assets/USD_Assets/robots/lunar_leaper_2cams_2ROS_dimensions_adapted_150mm_clearance_mass12_7_wider_wheels_further_back_removed_lidar_removed_exisitng_stereo_cam__physics_material_solar_gpr_legs_v13.usd
-      usd_path: assets/USD_Assets/robots/LL_v16_MMX.usd
+      usd_path: assets/USD_Assets/robots/LL_v17_1024.usd
       pose:
         position: [1050, 400, 0] #is ignored in largescale use starting_position above
         orientation: [1, 0, 0, 0] #is ignored in largescale

@@ -2,7 +2,6 @@ import logging
 from omni.isaac.core.utils.prims import get_prim_at_path
 from pxr import UsdGeom, Usd
 import omni.kit.viewport.utility
-from omni.isaac.sensor.scripts.camera import Camera
 import omni.kit.commands
 
 
