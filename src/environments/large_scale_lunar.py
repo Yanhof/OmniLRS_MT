@@ -115,6 +115,7 @@ class LargeScaleController(BaseEnv):
         usd_path: str,
         position: Tuple[float, float, float],
         orientation: Tuple[float, float, float, float] = (1.0, 0.0, 0.0, 0.0),
+        scale_factor: float = 1.0
     ) -> Usd.Prim:
         """
         Creates an Xform prim and adds a reference to a static USD asset.
@@ -136,7 +137,7 @@ class LargeScaleController(BaseEnv):
 
         # Set the transform.
         w, x, y, z = orientation
-        set_xform_ops(xform_prim, translate=Gf.Vec3d(position), orient=Gf.Quatd(w, Gf.Vec3d(x, y, z)))
+        set_xform_ops(xform_prim, translate=Gf.Vec3d(position), orient=Gf.Quatd(w, Gf.Vec3d(x, y, z)),scale=Gf.Vec3d(scale_factor, scale_factor, scale_factor))
         return xform_prim
     
     def instantiate_scene(self) -> None:
@@ -184,12 +185,20 @@ class LargeScaleController(BaseEnv):
         # TODO: These values should ideally come from the configuration (self.stage_settings)
         lander_usd_path = "/workspace/omnilrs/assets/USD_Assets/Lander/blueMoonLander.usd"  
         lander_prim_path = os.path.join(self.scene_name, "Lander")
-        lander_position = (0, 0, -1500)
+        lander_local_x = 255
+        lander_local_y = -700 
+        lander_world_x = lander_local_x - self.stage_settings.starting_position[0]
+        lander_world_y = lander_local_y - self.stage_settings.starting_position[1]
+        # Calculate the height at the lander position
+        height = -1565.65
+
+        lander_position = (lander_world_x, lander_world_y, height) 
         lander_orientation = (0.70711, 0.70711, 0.0, 0.0)   #upright orientation
+        lander_scale_factor = 0.25  # 0.25 lets blue moon lander be size of intiotive machines c lander
 
 
         self._place_static_asset(
-            prim_path=lander_prim_path, usd_path=lander_usd_path, position=lander_position, orientation=lander_orientation
+            prim_path=lander_prim_path, usd_path=lander_usd_path, position=lander_position, orientation=lander_orientation, scale_factor=lander_scale_factor
         )
         # ----------------------------------------------------
 
