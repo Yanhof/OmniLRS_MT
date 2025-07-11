@@ -1,6 +1,8 @@
 #!/bin/bash
+
 xhost +
 docker run --name isaac-sim-omnilrs-container -it --gpus all -e "ACCEPT_EULA=Y" --rm --network=host --ipc=host \
+-v /dev/shm:/dev/shm \
 -v $HOME/.Xauthority:/root/.Xauthority \
 -e DISPLAY=$DISPLAY \
 -v /tmp/.X11-unix:/tmp/.X11-unix \

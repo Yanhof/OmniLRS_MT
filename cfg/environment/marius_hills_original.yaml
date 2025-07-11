@@ -35,8 +35,8 @@ large_scale_terrain:
 
   #starting poisition need to be multiple of block size
   #starting_position: [480, -660] #is near pit for block size 20
-  starting_position: [480,-580] #is near pit edge for block size 20
-  #starting_position: [260,-700] #is near landing zone for block size 20
+  #starting_position: [480,-580] #is near pit edge for block size 20
+  starting_position: [260,-700] #is near landing zone for block size 20
   #starting_position: [500,-520] #is in pit for block size 40
   #starting_position: [440,-560] #is near pit for block size 40
   
@@ -177,11 +177,15 @@ robots_settings:
       #robot_name: husky
      # usd_path: assets/USD_Assets/robots/ros2_husky_PhysX_vlp16.usd
       #robot_name: jackal
-      #usd_path: assets/USD_Assets/robots/ros2_jackal_PhysX_vlp16_stereo.usd
+      #usd_path: assets/USD_Assets/robots/ros2_jackal_PhysX_vlp16_stereo_fix_4_5.usd
       robot_name: LL
       #2ROS CAMS
       #usd_path: assets/USD_Assets/robots/lunar_leaper_2cams_2ROS_dimensions_adapted_150mm_clearance_mass12_7_wider_wheels_further_back_removed_lidar_removed_exisitng_stereo_cam__physics_material_solar_gpr_legs_v13.usd
-      usd_path: assets/USD_Assets/robots/LL_v17_1024_imu_added_noise.usd
+      #usd_path: assets/USD_Assets/robots/LL_v17_1024_imu_added_noise_large_coverage_angeled_case2.usd
+      usd_path: assets/USD_Assets/robots/LL_v17_1024_imu_added_noise2.usd
+      #usd_path: assets/USD_Assets/robots/v4_5_fixed_LL_v17_1024_imu_added_noise4.usd
+      
+
       pose:
         position: [1050, 400, 0] #is ignored in largescale use starting_position above
         orientation: [1, 0, 0, 0] #is ignored in largescale

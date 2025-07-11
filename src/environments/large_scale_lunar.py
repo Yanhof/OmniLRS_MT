@@ -108,7 +108,37 @@ class LargeScaleController(BaseEnv):
         py = math.sin(math.radians(self.stage_settings.earth_azimuth)) * dist
         pz = math.sin(math.radians(self.stage_settings.earth_elevation)) * dist
         set_xform_ops(self._earth_prim, Gf.Vec3d(px, py, pz), Gf.Quatd(0, 0, 0, 1))
+    
+    def _place_static_asset(
+        self,
+        prim_path: str,
+        usd_path: str,
+        position: Tuple[float, float, float],
+        orientation: Tuple[float, float, float, float] = (1.0, 0.0, 0.0, 0.0),
+    ) -> Usd.Prim:
+        """
+        Creates an Xform prim and adds a reference to a static USD asset.
 
+        Args:
+            prim_path (str): The path for the new prim (e.g., "/LargeScaleLunar/Lander").
+            usd_path (str): The path to the asset USD file to reference.
+            position (Tuple[float, float, float]): The (x, y, z) position to place the asset.
+            orientation (Tuple[float, float, float, float], optional): The (w, x,y, z) orientation. Defaults to identity.
+
+        Returns:
+            Usd.Prim: The created Xform prim.
+        """
+        # Define an Xform prim at the specified path.
+        xform_prim = self.stage.DefinePrim(prim_path, "Xform")
+
+        # Add a reference to the lander's USD file.
+        xform_prim.GetReferences().AddReference(assetPath=usd_path)
+
+        # Set the transform.
+        w, x, y, z = orientation
+        set_xform_ops(xform_prim, translate=Gf.Vec3d(position), orient=Gf.Quatd(w, Gf.Vec3d(x, y, z)))
+        return xform_prim
+    
     def instantiate_scene(self) -> None:
         """
         Instantiates the scene. Applies any operations that need to be done after the scene is built and
@@ -149,6 +179,22 @@ class LargeScaleController(BaseEnv):
         # Instantiates the terrain manager
         self.LSTM = LargeScaleTerrainManager(self.stage_settings, is_simulation_alive=self.is_simulation_alive)
         self.LSTM.build()
+
+        # --- Place static assets that depend on the terrain ---
+        # TODO: These values should ideally come from the configuration (self.stage_settings)
+        lander_usd_path = "/workspace/omnilrs/assets/USD_Assets/Lander/blueMoonLander.usd"  
+        lander_prim_path = os.path.join(self.scene_name, "Lander")
+        lander_position = (0, 0, -1500)
+        lander_orientation = (0.70711, 0.70711, 0.0, 0.0)   #upright orientation
+
+
+        self._place_static_asset(
+            prim_path=lander_prim_path, usd_path=lander_usd_path, position=lander_position, orientation=lander_orientation
+        )
+        # ----------------------------------------------------
+
+
+
         # Sets the sun using the stellar engine if enabled
         if self.enable_stellar_engine:
             self.SE.set_lat_lon(*self.LSTM.get_lat_lon())

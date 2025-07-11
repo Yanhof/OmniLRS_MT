@@ -110,6 +110,9 @@ class RobotManager:
                     world,
                 )
 
+
+
+    
     def add_robot(
         self,
         usd_path: str = None,
