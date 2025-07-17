@@ -109,3 +109,5 @@ class RendererConf:
             "PathTracing",
             "RayTracedLighting",
         ], "renderer must be PATH, PathTracing or RayTracedLighting"
+
+

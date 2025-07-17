@@ -27,3 +27,4 @@ chromatic_aberration:
   enable: False
   strength: [-0.055, -0.075, 0.015]
   model: ["Radial", "Radial", "Radial"]
+

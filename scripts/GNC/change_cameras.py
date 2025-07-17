@@ -20,8 +20,7 @@ front_z = 0.0
 front_inward_rotation = 0 # positive is inwards for FR, is y axis
 front_upward_rotation = 0 #positive is upwards for FR, is x axis
 
-#fps for the cameras
-CAMERA_FPS = 1
+
 
 # -------- Camera Prim Paths --------
 CAMERA_PRIM_PATHS = {
@@ -223,13 +222,13 @@ CAMERA_MODELS = {
         OpticalCenterY=1374,
         MaxFOV=87.6, 
     ),
-        "4m8mm": CameraModel(
+        "80deg_4m8mm": CameraModel(
         #pixel size us 5.5 mikrometers
         focal_length=7.9,
         focus_distance=5, #unknown
         fstop=8.0,
-        horizontal_aperture=13.25777417,
-        vertical_aperture=13.25777417,
+        horizontal_aperture=11.264,
+        vertical_aperture=11.264,
         horizontal_aperture_offset=0.0,
         vertical_aperture_offset=0.0,
         clipping_rangeX=0.05,
@@ -239,7 +238,7 @@ CAMERA_MODELS = {
         NominalHeight=2048,
         OpticalCenterX=1024,
         OpticalCenterY=1024,
-        MaxFOV=99.8, #datasheet says 80x80 (horizontal,vertical) but here is diagonal FOV, also when calculating it do I get 71, this can be corrected by using fisheye model
+        MaxFOV=120, #datasheet says 80x80 (horizontal,vertical) but here is diagonal FOV, also when calculating it do I get 71, this can be corrected by using fisheye model
     ),
         "4m11mm": CameraModel(
         #pixel size us 5.5 mikrometers

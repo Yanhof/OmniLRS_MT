@@ -1,7 +1,7 @@
 name: Lunalab
 seed: 42  
-physics_dt: 0.0333 # 30 Hz
-rendering_dt: 0.0333 # 30 Hz
+physics_dt: 0.01 # 30 Hz
+rendering_dt: 0.01 # 30 Hz
 enforce_realtime: true
 
 lunalab_settings: # These settings cannot be changed.
@@ -165,7 +165,7 @@ robots_settings:
       #robot_name: jackal
       #usd_path: assets/USD_Assets/robots/ros2_jackal_PhysX_vlp16_stereo.usd
       robot_name: LL
-      usd_path: assets/USD_Assets/robots/LL_v17.usd
+      usd_path: assets/USD_Assets/robots/openVins_version_noise_zero_LL_v17_1024_imu_added_noise3.usd
       #usd_path: assets/USD_Assets/robots/lunar_leaper_4cams_ROS_bare_visuals_camera_adapted_working.usd
       pose:
         position: [5.0, 5.0, 1]

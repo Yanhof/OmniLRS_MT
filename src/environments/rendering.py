@@ -338,3 +338,5 @@ def set_motion_blur_num_samples(value: int = 8) -> None:
 
     settings = carb.settings.get_settings()
     settings.set("/rtx/post/motionblur/numSamples", value)
+
+

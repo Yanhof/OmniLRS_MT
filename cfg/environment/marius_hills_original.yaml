@@ -2,9 +2,9 @@
 
 name: LargeScale # Keep this as LargeScale as it defines the environment type
 seed: 42 # You can change this seed if you want a different procedural generation overlay
-physics_dt: 0.0333 # # 
-rendering_dt: 0.0333 #0.0333 # 30 Hz
-enforce_realtime: true #if true uses the physics_dt
+physics_dt: 0.00125 #neeeds to be set in the physics configs actually, setting this value low enables publishing the IMU data at a higher frequency 
+rendering_dt: 0.01 #0.0333 # 30 Hz
+enforce_realtime: false 
 
 # physics_settings: best to change in cfg/physics/default_physics.yaml
 
@@ -35,8 +35,8 @@ large_scale_terrain:
 
   #starting poisition need to be multiple of block size
   #starting_position: [480, -660] #is near pit for block size 20
-  #starting_position: [480,-580] #is near pit edge for block size 20
-  starting_position: [260,-700] #is near landing zone for block size 20
+  starting_position: [480,-580] #is near pit edge for block size 20
+  #starting_position: [260,-700] #is near landing zone for block size 20
   #starting_position: [500,-520] #is in pit for block size 40
   #starting_position: [440,-560] #is near pit for block size 40
   #starting_position: [0, 0] 
@@ -150,8 +150,8 @@ stellar_engine_settings:
     day: 20 # !!!!!!! 20.5.2024 10:30 is lunar morning
     hour: 10
     minute: 30
-  time_scale: 3600 #1.0 #change to 1.0 for real time, 600 means 1s = 10min
-  update_interval: 5 #time before stellar engine updates 
+  time_scale: 600 #1.0 #change to 1.0 for real time, 600 means 1s = 10min
+  update_interval: 1 #time before stellar engine updates 
 
 # Sun settings (copy as is)
 sun_settings:
@@ -177,17 +177,17 @@ robots_settings:
     -
       #robot_name: husky
      # usd_path: assets/USD_Assets/robots/ros2_husky_PhysX_vlp16.usd
-      robot_name: jackal
-      usd_path: assets/USD_Assets/robots/ros2_jackal_PhysX_vlp16.usd
+      #robot_name: jackal
+      #usd_path: assets/USD_Assets/robots/ros2_jackal_PhysX_vlp16.usd
       #usd_path: assets/USD_Assets/robots/ros2_jackal_PhysX_vlp16_stereo_fix_4_5.usd
-      #robot_name: LL
+      #usd_path: assets/USD_Assets/robots/4_5_ros2_jackal_PhysX_vlp16_stereo.usd
+      robot_name: LL
       #2ROS CAMS
       #usd_path: assets/USD_Assets/robots/lunar_leaper_2cams_2ROS_dimensions_adapted_150mm_clearance_mass12_7_wider_wheels_further_back_removed_lidar_removed_exisitng_stereo_cam__physics_material_solar_gpr_legs_v13.usd
       #usd_path: assets/USD_Assets/robots/LL_v17_1024_imu_added_noise_large_coverage_angeled_case2.usd
       #usd_path: assets/USD_Assets/robots/LL_v17_1024_imu_added_noise2.usd
+      usd_path: assets/USD_Assets/robots/openVins_version_noise_zero_LL_v17_1024_imu_added_noise3.usd
       #usd_path: assets/USD_Assets/robots/v4_5_fixed_LL_v17_1024_imu_added_noise4.usd
-      
-
       pose:
         position: [1050, 400, 0] #is ignored in largescale use starting_position above
         orientation: [1, 0, 0, 0] #is ignored in largescale
