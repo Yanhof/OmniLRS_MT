@@ -17,6 +17,8 @@ def startSim(cfg: dict):
             super().__init__(launch_config, experience)
             self.wait_for_threads = []
 
+
+
         def add_wait(self, waiting_functions: list) -> None:
             """
             Adds a list of functions that will wait until a condition is met before closing the simulation.
@@ -89,6 +91,10 @@ def startSim(cfg: dict):
     # Starts the simulation and allows to import things related to Isaac and PXR
     renderer_cfg = cfg["rendering"]["renderer"]
     simulation_app = SimulationApp_wait(renderer_cfg.__dict__)
+    from omni.isaac.core.utils import extensions as isaac_ext  # module now resolves
+    isaac_ext.enable_extension("omni.graph.action")            # node library
+    isaac_ext.enable_extension("omni.graph.window.action")     # editor UI
+    simulation_app.update()                                    # finish loading
     set_lens_flares(cfg)
     set_motion_blur(cfg)
     set_chromatic_aberrations(cfg)
