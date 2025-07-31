@@ -185,8 +185,8 @@ class LargeScaleController(BaseEnv):
         # TODO: These values should ideally come from the configuration (self.stage_settings)
         lander_usd_path = "/workspace/omnilrs/assets/USD_Assets/Lander/blueMoonLander.usd"  
         lander_prim_path = os.path.join(self.scene_name, "Lander")
-        lander_local_x = 255
-        lander_local_y = -700 
+        lander_local_x = -255
+        lander_local_y = 700 
         lander_world_x = lander_local_x - self.stage_settings.starting_position[0]
         lander_world_y = lander_local_y - self.stage_settings.starting_position[1]
         # Calculate the height at the lander position
