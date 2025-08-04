@@ -35,8 +35,8 @@ large_scale_terrain:
 
   #starting poisition need to be multiple of block size
   #starting_position: [-480, 660] #is near pit for block size 20
-  starting_position: [-480,580] #is near pit edge for block size 20
-  #starting_position: [-260,700] #is near landing zone for block size 20
+  #starting_position: [-480,580] #is near pit edge for block size 20
+  starting_position: [-260,700] #is near landing zone for block size 20
 
 
 
@@ -154,7 +154,7 @@ stellar_engine_settings:
   start_date:
     year: 2024
     month: 5 
-    day: 20 # !!!!!!! 20.5.2024 10:30 is lunar morning
+    day: 20 # !!!!!!! 20.5.2024 9:30 is start of lunar day at pit location, with sun elevation of 0 degrees
     hour: 15
     minute: 30
   time_scale: 600 #1.0 #change to 1.0 for real time, 600 means 1s = 10min
@@ -191,7 +191,11 @@ robots_settings:
       robot_name: LL
 
       #For 2023 use this robot 
-      usd_path: assets/USD_Assets/robots/openVins_version_noise_zero_LL_v17_1024_imu_added_noise5.usd
+      #usd_path: assets/USD_Assets/robots/openVins_version_noise_zero_LL_v17_1024_imu_added_noise5.usd
+      #usd_path: assets/USD_Assets/robots/LL_selection_80FOV_27_down_14cm_baseline_34cm_up.usd #80 def FOV, based on open vins 5
+      usd_path: assets/USD_Assets/robots/LL_selection_120FOV_27_down_14cm_baseline_34cm_up.usd #120 def FOV based on open vins 5
+
+
 
       #For 4.5 use this robot below, has issue in drive graph where make array has bug to not be a ble to have more than 1 input and camera render is disabled manually as freezes otherwise
       #usd_path: assets/USD_Assets/robots/4_5_restart_clock_imu_drive_tf2_cameraSAVE_openVins_version_noise_zero_LL_v17_1024_imu_added_noise3.usd
