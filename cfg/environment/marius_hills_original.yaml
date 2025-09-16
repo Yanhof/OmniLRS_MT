@@ -35,8 +35,8 @@ large_scale_terrain:
 
   #starting poisition need to be multiple of block size
   #starting_position: [-480, 660] #is near pit for block size 20
-  #starting_position: [-480,580] #is near pit edge for block size 20
-  starting_position: [-260,700] #is near landing zone for block size 20
+  starting_position: [-480,580] #is near pit edge for block size 20
+  #starting_position: [-260,700] #is near landing zone for block size 20
 
 
 
